@@ -1,0 +1,102 @@
+<div class="card">
+  <div class="card-header">
+    {{pageTitle}}
+  </div>
+
+  <div class="card-body"
+       *ngIf="product">
+    <form novalidate
+          (ngSubmit)="saveProduct()"
+          [formGroup]="productForm">
+
+      <div class="form-group row mb-2">
+        <label class="col-md-2 col-form-label"
+               for="productNameId">Product Name</label>
+        <div class="col-md-8">
+          <input class="form-control"
+                 id="productNameId"
+                 type="text"
+                 placeholder="Name (required)"
+                 formControlName="productName"
+                 [ngClass]="{'is-invalid': (productForm.get('productName').touched ||
+                                            productForm.get('productName').dirty) &&
+                                            !productForm.get('productName').valid }" />
+          <span class="invalid-feedback">
+            <span *ngIf="productForm.get('productName').errors?.required">
+              Please enter the product name.
+            </span>
+            <span *ngIf="productForm.get('productName').errors?.minlength">
+              The product name must be at least 3 characters long.
+            </span>
+            <span *ngIf="productForm.get('productName').errors?.maxlength">
+              The product name cannot exceed 50 characters.
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group row mb-2">
+        <label class="col-md-2 col-form-label"
+               for="productCodeId">Product Code</label>
+        <div class="col-md-8">
+          <input class="form-control"
+                 id="productCodeId"
+                 type="text"
+                 placeholder="Code (required)"
+                 formControlName="productCode"
+                 [ngClass]="{'is-invalid': (productForm.get('productCode').touched ||
+                                            productForm.get('productCode').dirty) &&
+                                            !productForm.get('productCode').valid }" />
+          <span class="invalid-feedback">
+            <span *ngIf="productForm.get('productCode').errors?.required">
+              Please enter the product code.
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group row mb-2">
+        <label class="col-md-2 col-form-label"
+               for="descriptionId">Description</label>
+
+        <div class="col-md-8">
+          <textarea class="form-control"
+                    id="descriptionId"
+                    placeholder="Description"
+                    rows=3
+                    formControlName="description"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group row mb-2">
+        <div class="offset-md-2 col-md-4">
+          <button class="btn btn-primary mr-3"
+                  style="width:80px;"
+                  type="submit"
+                  [title]="productForm.valid ? 'Save your entered data' : 'Disabled until the form data is valid'"
+                  [disabled]="!productForm.valid">
+            Save
+          </button>
+          <button class="btn btn-outline-secondary mr-3"
+                  style="width:80px;"
+                  type="button"
+                  title="Cancel your edits"
+                  [routerLink]="['/products']">
+            Cancel
+          </button>
+          <button class="btn btn-outline-warning"
+                  style="width:80px"
+                  type="button"
+                  title="Delete this product"
+                  (click)="deleteProduct()">
+            Delete
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="alert alert-danger"
+       *ngIf="errorMessage">{{errorMessage}}
+  </div>
+</div>
