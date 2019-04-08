@@ -4,37 +4,44 @@
   </div>
 
   <div class="card-body">
+    <div class="container">
+      <div class="row justify-content-between">
+        <div class="col-3">
+          <select class="form-control"
+                  (change)="onSelected($event.target.value)">
+            <option value="">- Display All -</option>
+            <option *ngFor="let c of categories$ | async ">{{ c }}</option>
+          </select>
+        </div>
+        <div class="col-2">
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="onAdd()">Add Product</button>
+        </div>
+      </div>
+    </div>
+
     <div class="table-responsive">
       <table class="table mb-0"
-             *ngIf="products">
+             *ngIf="products$ | async as products">
         <thead>
           <tr>
             <th>Product</th>
             <th>Code</th>
+            <th>Category</th>
             <th>Price</th>
-            <th></th>
+            <th>In Stock</th>
+            <th>Valuation</th>
           </tr>
         </thead>
-        <tbody>
-          <tr *ngFor="let product of products">
-            <td>
-              <a [routerLink]="[product.id]">
-                {{ product.productName }}
-              </a>
-            </td>
-            <td>{{ product.productCode }}</td>
-            <td>{{ product.price | currency:"USD":"symbol":"1.2-2" }}</td>
-            <td>
-              <button class="btn btn-outline-primary btn-sm"
-                      [routerLink]="[product.id, 'edit']">
-                Edit
-              </button>
-            </td>
-          </tr>
+        <tbody *ngFor="let product of products">
           <tr>
-            <td></td>
-            <td></td>
-            <td>{{productTotal}}</td>
+            <td>{{ product.productName }}</td>
+            <td>{{ product.productCode }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.price | currency:"USD":"symbol":"1.2-2" }}</td>
+            <td>{{ product.quantityInStock }}</td>
+            <td>{{ product.inventoryValuation | currency:"USD":"symbol":"1.2-2" }}</td>
           </tr>
         </tbody>
       </table>

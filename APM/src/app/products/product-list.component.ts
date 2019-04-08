@@ -1,72 +1,70 @@
-import { Component, OnInit, DoCheck } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { Product } from './product';
 import { ProductService } from './product.service';
-import { interval } from 'rxjs';
-import { NumberValueAccessor } from '@angular/forms/src/directives';
+import { interval, Observable, of, Subject, combineLatest, BehaviorSubject } from 'rxjs';
+import { catchError, mergeMap, pluck, tap, distinct, toArray, filter, map, startWith, shareReplay } from 'rxjs/operators';
+import { ProductCategoryService } from '../product-categories/product-category.service';
 
 @Component({
   templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+  styleUrls: ['./product-list.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProductListComponent implements OnInit, DoCheck {
+export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
-  products: Product[] = [];
-  productTotal: number;
 
-  constructor(private productService: ProductService) { }
+  private selectedCategorySource = new Subject();
+  selectedCategoryChanges$ = this.selectedCategorySource.asObservable();
 
-  ngOnInit(): void {
-    // this.productService.getProducts().subscribe(
-    //   products => {
-    //     this.products = products;
-    //     console.log(this.products);
-    //   },
-    //   error => this.errorMessage = <any>error
-    // );
-
-    // This logs "undefined"
-    // console.log(this.products);
-
-    // this.productService.getProductsOneByOne().subscribe(
-    //   product => {
-    //     //console.log('Before timeout');
-    //     //setTimeout(() => {
-    //       this.products.push(product);
-    //       console.log(product);
-    //     //}, 1000);
-    //   },
-    //   error => this.errorMessage = <any>error
-    // );
-
-    // this.productService.getProductsByCategory('Garden').subscribe(
-    //   product => {
-    //       this.products.push(product);
-    //       console.log(product);
-    //   },
-    //   error => this.errorMessage = <any>error
-    // );
-
-    this.productService.getProductMax().subscribe(
-      product => {
-          this.products.push(product);
-          console.log(product);
-      },
-      error => this.errorMessage = <any>error
+  // Or withLatestFrom
+  products$ = combineLatest(
+    this.productService.productsWithAdd$,
+    this.selectedCategoryChanges$.pipe(startWith(null))
+  )
+    .pipe(
+      map(([products, category]) => products.filter(product => category ? product.category === category : true)),
+      catchError(err => {
+        this.errorMessage = err;
+        return of(null);
+      })
     );
 
-    this.productService.getProductsTotal().subscribe(
-      total => this.productTotal = total
-    )
+  // Categories for drop down list
+  categories$ = this.productCategoryService.categoryNames$;
+
+  /*
+    Code from prior examples
+  */
+  productsJustProducts$ = this.productService.products$
+    .pipe(
+      catchError(err => {
+        this.errorMessage = err;
+        return of(null);
+      })
+    );
+
+  // Filter to defined category
+  selectedCategory = 'Garden';
+  productsSimpleFilter$ = this.productService.productsWithCategory$
+    .pipe(
+      mergeMap(products => products),
+      filter(product => product.category === this.selectedCategory),
+      toArray(),
+      catchError(err => {
+        this.errorMessage = err;
+        return of(null);
+      })
+    );
+
+  constructor(private productService: ProductService,
+    private productCategoryService: ProductCategoryService) { }
+
+  onSelected(category: string): void {
+    this.selectedCategorySource.next(category);
   }
 
-  ngDoCheck() {
-    console.log("In do check");
+  onAdd() {
+    this.productService.addOne();
   }
-
-  trackByFunction(index, item: Product) {
-    return item.id;
-  }
-
 }

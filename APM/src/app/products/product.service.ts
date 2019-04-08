@@ -1,10 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, tap, map, mergeMap, delay, concatMap, filter, reduce, max, startWith } from 'rxjs/operators';
+import { Observable, of, throwError, Subject, merge, from, combineLatest, ReplaySubject } from 'rxjs';
+import {
+  catchError, tap, map, mergeMap, delay, concatMap, filter,
+  reduce, max, startWith, toArray, mergeAll, scan, shareReplay, switchMap
+} from 'rxjs/operators';
 
-import { Product } from './product';
+import { Product, ProductClass } from './product';
+import { ProductFromAPI } from './product-data-fromAPI';
+import { ProductCategoryService } from '../product-categories/product-category.service';
+import { SupplierService } from '../suppliers/supplier.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,33 +18,219 @@ import { Product } from './product';
 export class ProductService {
   private productsUrl = 'api/products';
 
-  constructor(private http: HttpClient) { }
+  // Retrieve products and map to desired shape
+  products$ = this.http.get<Product[]>(this.productsUrl)
+    .pipe(
+      tap(data => console.log('Before map', JSON.stringify(data))),
+      map(products => products.map(product => ({
+        ...product,
+        price: product.price * 1.5,
+        searchKey: [product.category]
+      }) as Product)),
+      tap(data => console.log('After map', JSON.stringify(data))),
+      catchError(err => {
+        console.error(err);
+        return throwError(err);
+      })
+    );
 
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.productsUrl)
-      .pipe(
-        tap(data => console.log(JSON.stringify(data))),
-        catchError(this.handleError)
-      );
+  // Combine products with categories
+  // And map category id to category name
+  // Be sure to specify the type to ensure after the map that it knows the correct type
+  productsWithCategory$ = combineLatest(
+    this.products$,
+    this.productCategoryService.productCategories$
+  ).pipe(
+    map(([products, categories]) =>
+      products.map(
+        p =>
+          ({
+            ...p,
+            category: categories.find(c => p.categoryId === c.id).name
+          } as Product) // <-- note the type here!
+      )
+    ),
+    shareReplay()
+  );
+
+  // Use ReplaySubject to "replay" values to new subscribers
+  // ReplaySubject buffers the defined number of values, in this case 1.
+  // Retains the currently selected product Id
+  // Uses 0 for no selected product (can't use null because it is used as a route parameter)
+  private selectedProductSource = new ReplaySubject<number>(1);
+  // Expose the selectedProduct as an observable for use by any components
+  selectedProductChanges$ = this.selectedProductSource.asObservable();
+
+  // Currently selected product
+  // Used in both List and Detail pages,
+  // so use the shareReply to share it with any component that uses it
+  // Location of the shareReplay matters ... won't share anything *after* the shareReplay
+  selectedProduct$ = combineLatest(
+    this.selectedProductChanges$,
+    this.productsWithCategory$
+  ).pipe(
+    map(([selectedProductId, products]) =>
+      products.find(product => product.id === selectedProductId)
+    ),
+    tap(product => console.log('selectedProduct', product)),
+    shareReplay(),
+    catchError(this.handleError)
+  );
+
+  // SwitchMap here instead of mergeMap so quickly clicking on
+  // the items cancels prior requests.
+  selectedProductSuppliers$ = this.selectedProduct$.pipe(
+    switchMap(product =>
+      product ? this.supplierService.getSuppliersByIds(product.supplierIds) : of(null)
+    ),
+    catchError(this.handleError)
+  );
+
+  /*
+    Code from prior examples
+  */
+
+  // Retrieve products and map to increase price using mergeMap
+  productsWithIncreasedPrice1$ = this.http.get<Product[]>(this.productsUrl)
+    .pipe(
+      mergeMap(item => item),
+      map(item => ({ ...item, price: item.price * 1.5 })),
+      toArray(),
+      tap(data => console.log('Increase Price', JSON.stringify(data))),
+      catchError(err => {
+        console.error(err);
+        return throwError(err);
+      })
+    );
+
+  // Retrieve products and map to increase price using mergeAll
+  productsWithIncreasedPrice2$ = this.http.get<Product[]>(this.productsUrl)
+    .pipe(
+      mergeAll(),
+      map(item => ({ ...item, price: item.price * 1.5 } as Product)),
+      toArray(),
+      tap(data => console.log('Increase Price', JSON.stringify(data))),
+      catchError(err => {
+        console.error(err);
+        return throwError(err);
+      })
+    );
+
+  // Retrieve products and map to increase price using array map
+  productsWithIncreasedPrice3$ = this.http.get<Product[]>(this.productsUrl)
+    .pipe(
+      map(products => products.map(p => ({ ...p, price: p.price * 1.5 } as Product))),
+      tap(data => console.log('Increase Price', JSON.stringify(data))),
+      catchError(err => {
+        console.error(err);
+        return throwError(err);
+      })
+    );
+
+  // Mapping from API fields to new shape using mergeMap and toArray
+  productsFromAPI1$ = this.http.get<ProductFromAPI[]>(this.productsUrl)
+    .pipe(
+      tap(data => console.log('Before mergeMap', JSON.stringify(data))),
+      mergeMap(products => products),
+      tap(data => console.log('After mergeMap', JSON.stringify(data))),
+      map(product => ({
+        id: product.p_id,
+        productName: product.p_nam,
+        productCode: product.p_cd,
+        description: product.p_des,
+        price: product.p_p
+      }) as Product),
+      tap(data => console.log('After map', JSON.stringify(data))),
+      map(product => ({ ...product, price: product.price * 1.5 })),
+      tap(data => console.log('After 2nd map', JSON.stringify(data))),
+      toArray(),
+      tap(data => console.log('After toArray', JSON.stringify(data))),
+      catchError(err => {
+        console.error(err);
+        return throwError(err);
+      })
+    );
+
+  // Mapping from API fields to new shape using Array map
+  productsFromAPI2$ = this.http.get<ProductFromAPI[]>(this.productsUrl)
+    .pipe(
+      tap(data => console.log('Before map', JSON.stringify(data))),
+      map(products => products.map(product => ({
+        id: product.p_id,
+        productName: product.p_nam,
+        productCode: product.p_cd,
+        description: product.p_des,
+        price: product.p_p * 1.5
+      }) as Product)),
+      tap(data => console.log('After map', JSON.stringify(data))),
+      catchError(err => {
+        console.error(err);
+        return throwError(err);
+      })
+    );
+
+  // Mapping to a class instance
+  productsClassInstance$ = this.http.get<ProductClass[]>(this.productsUrl)
+    .pipe(
+      tap(data => console.log('Before map', JSON.stringify(data))),
+      map(products => products.map(product => {
+        const productInstance: ProductClass = Object.assign(new ProductClass(), {
+          ...product,
+          price: product.price * 1.5,
+          searchKey: [product.category]
+        });
+        productInstance.inventoryValuation = productInstance.calculateValuation();
+        return productInstance;
+      })),
+      tap(data => console.log('After map', JSON.stringify(data))),
+      catchError(err => {
+        console.error(err);
+        return throwError(err);
+      })
+    );
+
+  /*
+
+Allows adding of products to the Observable
+
+*/
+  productInsertSource = new Subject<Product>();
+  productInserts$ = this.productInsertSource.asObservable();
+
+  productsWithAdd$ = merge(
+    this.productsWithCategory$,
+    this.productInserts$)
+    .pipe(
+      scan((acc: Product[], value: Product) => [...acc, value]),
+      catchError(err => {
+        console.error(err);
+        return throwError(err);
+      })
+    );
+
+  addOne() {
+    this.productInsertSource.next({
+      id: 42,
+      productName: 'Another One',
+      productCode: 'TBX-0042',
+      description: 'Our new product',
+      price: 8.9,
+      categoryId: 3,
+      category: 'Toolbox',
+      quantityInStock: 30
+    });
   }
 
-  getProductsOneByOne(): Observable<Product> {
-    return this.http.get<Product[]>(this.productsUrl)
-      .pipe(
-        mergeMap(item => item),
-        catchError(this.handleError)
-      );
+  constructor(private http: HttpClient,
+    private productCategoryService: ProductCategoryService,
+    private supplierService: SupplierService) { }
+
+  // Change the selected product
+  changeSelectedProduct(selectedProductId: number | null): void {
+    this.selectedProductSource.next(selectedProductId);
   }
 
-  getProductsOneByOne2(): Observable<Product> {
-    return this.http.get<Product[]>(this.productsUrl)
-      .pipe(
-        mergeMap(item => item),
-        concatMap(item => of(item).pipe(delay(500))),
-        catchError(this.handleError)
-      );
-  }
-
+  // @@@ Used?
   getProductsByCategory(category: string): Observable<Product> {
     return this.http.get<Product[]>(this.productsUrl)
       .pipe(
@@ -48,70 +240,7 @@ export class ProductService {
       );
   }
 
-  getProductsTotal(): Observable<number> {
-    return this.http.get<Product[]>(this.productsUrl)
-      .pipe(
-        mergeMap(item => item),
-        reduce<Product, number>((acc, item) => acc + item.price, 0),
-        catchError(this.handleError)
-      );
-  }
-
-  getProductMax(): Observable<Product> {
-    return this.http.get<Product[]>(this.productsUrl)
-      .pipe(
-        mergeMap(item => item),
-        max<Product>((a, b) => a.price < b.price ? -1: 1),
-        catchError(this.handleError)
-      );
-  }
-
-  getProduct(id: number): Observable<Product> {
-    if (id === 0) {
-      return of(this.initializeProduct());
-    }
-    const url = `${this.productsUrl}/${id}`;
-    return this.http.get<Product>(url)
-      .pipe(
-        tap(data => console.log('getProduct: ' + JSON.stringify(data))),
-        startWith(this.initializeProduct()),
-        catchError(this.handleError)
-      );
-  }
-
-  createProduct(product: Product): Observable<Product> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    product.id = null;
-    return this.http.post<Product>(this.productsUrl, product, { headers: headers })
-      .pipe(
-        tap(data => console.log('createProduct: ' + JSON.stringify(data))),
-        catchError(this.handleError)
-      );
-  }
-
-  deleteProduct(id: number): Observable<{}> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const url = `${this.productsUrl}/${id}`;
-    return this.http.delete<Product>(url, { headers: headers })
-      .pipe(
-        tap(data => console.log('deleteProduct: ' + id)),
-        catchError(this.handleError)
-      );
-  }
-
-  updateProduct(product: Product): Observable<Product> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const url = `${this.productsUrl}/${product.id}`;
-    return this.http.put<Product>(url, product, { headers: headers })
-      .pipe(
-        tap(() => console.log('updateProduct: ' + product.id)),
-        // Return the product on an update
-        map(() => product),
-        catchError(this.handleError)
-      );
-  }
-
-  private handleError(err) {
+  private handleError(err: any) {
     // in a real world app, we may send the server to some remote logging infrastructure
     // instead of just logging it to the console
     let errorMessage: string;
@@ -127,17 +256,49 @@ export class ProductService {
     return throwError(errorMessage);
   }
 
-  private initializeProduct(): Product {
-    // Return an initialized object
-    return {
-      id: 0,
-      productName: null,
-      productCode: null,
-      category: null,
-      tags: [],
-      price: null,
-      description: null,
-      imageUrl: null
-    };
+  /*
+
+    Additional examples, not included in the course
+
+  */
+
+  // Returns the product with the highest price
+  getProductMax(): Observable<Product> {
+    return this.http.get<Product[]>(this.productsUrl)
+      .pipe(
+        mergeMap(item => item),
+        max<Product>((a, b) => a.price < b.price ? -1 : 1),
+        catchError(this.handleError)
+      );
   }
+
+  // Totals the prices for all items
+  getProductsTotal(): Observable<number> {
+    return this.http.get<Product[]>(this.productsUrl)
+      .pipe(
+        mergeMap(item => item),
+        reduce<Product, number>((acc, item) => acc + item.price, 0),
+        catchError(this.handleError)
+      );
+  }
+
+  // Emits one product at a time with a delay
+  // The component must then manually push each returned
+  // product to an array, subscribe, and bind to the array
+  getProductsOneByOne(): Observable<Product> {
+    return this.http.get<Product[]>(this.productsUrl)
+      .pipe(
+        mergeMap(item => item),
+        concatMap(item => of(item).pipe(delay(500))),
+        catchError(this.handleError)
+      );
+  }
+  // Component code:
+  // NOTE: Does not work with OnPush change detection
+  // products: Product[] = [];
+  // ngOnInit(): void {
+  //   this.productService.getProductsOneByOne()
+  //     .pipe(tap(product => this.products.push(product)))
+  //     .subscribe(console.log);
+  // }
 }

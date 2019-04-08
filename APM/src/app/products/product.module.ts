@@ -3,14 +3,11 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { ProductListComponent } from './product-list.component';
-import { ProductListAsyncPipeComponent } from './product-list-asyncPipe.component';
-import { ProductDetailComponent } from './product-detail.component';
-import { ProductEditComponent } from './product-edit/product-edit.component';
-
-import { ProductResolver } from './product-resolver.service';
-import { ProductEditGuard } from './product-edit/product-edit.guard';
+import { ProductShellComponent } from './product-list-alt/product-shell.component';
+import { ProductDetailComponent } from './product-list-alt/product-detail.component';
 
 import { SharedModule } from '../shared/shared.module';
+import { ProductListAltComponent } from './product-list-alt/product-list-alt.component';
 
 @NgModule({
   imports: [
@@ -22,26 +19,16 @@ import { SharedModule } from '../shared/shared.module';
         component: ProductListComponent
       },
       {
-        path: 'AsyncPipe',
-        component: ProductListAsyncPipeComponent
-      },
-      {
-        path: ':id',
-        component: ProductDetailComponent
-      },
-      {
-        path: ':id/edit',
-        component: ProductEditComponent,
-        canDeactivate: [ProductEditGuard],
-        resolve: { resolvedData: ProductResolver }
+        path: ':alternate',
+        component: ProductShellComponent
       }
     ])
   ],
   declarations: [
     ProductListComponent,
-    ProductListAsyncPipeComponent,
-    ProductDetailComponent,
-    ProductEditComponent
+    ProductShellComponent,
+    ProductListAltComponent,
+    ProductDetailComponent
   ]
 })
 export class ProductModule { }
