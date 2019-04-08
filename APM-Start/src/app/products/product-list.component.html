@@ -1,0 +1,55 @@
+<div class="card">
+  <div class="card-header">
+    {{pageTitle}}
+  </div>
+
+  <div class="card-body">
+    <div class="container">
+      <div class="row justify-content-between">
+        <div class="col-3">
+          <select class="form-control"
+                  (change)="onSelected($event.target.value)">
+            <option value="">- Display All -</option>
+          </select>
+        </div>
+        <div class="col-2">
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="onAdd()">Add Product</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table mb-0"
+             *ngIf="products">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Code</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>In Stock</th>
+            <th>Valuation</th>
+          </tr>
+        </thead>
+        <tbody *ngFor="let product of products">
+          <tr>
+            <td>{{ product.productName }}</td>
+            <td>{{ product.productCode }}</td>
+            <td>{{ product.categoryId }}</td>
+            <td>{{ product.price | currency:"USD":"symbol":"1.2-2" }}</td>
+            <td>{{ product.quantityInStock }}</td>
+            <td>{{ product.inventoryValuation | currency:"USD":"symbol":"1.2-2" }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div *ngIf="errorMessage"
+     class="alert alert-danger">
+  Error: {{ errorMessage }}
+</div>
