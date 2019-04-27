@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
+import { combineLatest, of, Subject } from 'rxjs';
 import { catchError, map, filter } from 'rxjs/operators';
 
 import { ProductService } from '../product.service';
 import { Product } from '../product';
-import { combineLatest, of, Subject } from 'rxjs';
 
 @Component({
   selector: 'pm-product-detail',
@@ -14,6 +14,7 @@ import { combineLatest, of, Subject } from 'rxjs';
 export class ProductDetailComponent {
   error$ = new Subject<string>();
 
+  // Product to display
   product$ = this.productService.selectedProduct$.pipe(
     catchError(error => {
       this.error$.next(error);
@@ -21,10 +22,13 @@ export class ProductDetailComponent {
     }));
 
   // Set the page title
-  pageTitle$ = this.product$.pipe(
-    map((p: Product) => p ? `Product Detail for: ${p.productName}` : null)
-  );
+  pageTitle$ = this.product$
+    .pipe(
+      map((p: Product) =>
+        p ? `Product Detail for: ${p.productName}` : null)
+    );
 
+  // Suppliers for this product
   productSuppliers$ = this.productService.selectedProductSuppliers$.pipe(
     catchError(error => {
       this.error$.next(error);
@@ -33,10 +37,16 @@ export class ProductDetailComponent {
 
   // Create a combined stream with the data used in the view
   // Use filter to skip if the product is null
-  vm$ = combineLatest([this.product$, this.productSuppliers$, this.pageTitle$]).pipe(
-    filter(([product]) => product),
-    map(([product, productSuppliers, pageTitle]) => ({ product, productSuppliers, pageTitle }))
-  );
+  vm$ = combineLatest([
+    this.product$,
+    this.productSuppliers$,
+    this.pageTitle$
+  ])
+    .pipe(
+      filter(([product]) => !!product),
+      map(([product, productSuppliers, pageTitle]) =>
+        ({ product, productSuppliers, pageTitle }))
+    );
 
   constructor(private productService: ProductService) { }
 

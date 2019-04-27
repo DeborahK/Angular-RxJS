@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { of, combineLatest, BehaviorSubject } from 'rxjs';
+import { of, combineLatest, Subject, BehaviorSubject } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { ProductService } from './product.service';
@@ -13,7 +13,7 @@ import { ProductCategoryService } from '../product-categories/product-category.s
 })
 export class ProductListComponent {
   pageTitle = 'Product List';
-  errorMessage = '';
+  error$ = new Subject<string>();
 
   // Action stream
   private selectCategoryAction = new BehaviorSubject<number>(0);
@@ -30,13 +30,24 @@ export class ProductListComponent {
           categoryId ? product.categoryId === categoryId : true)
       ),
       catchError(err => {
-        this.errorMessage = err;
+        this.error$.next(err);
         return of(null);
       })
     );
 
   // Categories for drop down list
   categories$ = this.productCategoryService.productCategories$;
+
+  // Combine all streams for the view
+  vm$ = combineLatest([
+    this.products$,
+    this.categories$
+  ])
+    .pipe(
+      map(([products, categories]) =>
+        ({ products, categories }))
+    );
+
 
   constructor(private productService: ProductService,
     private productCategoryService: ProductCategoryService) { }
