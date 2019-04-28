@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, throwError, forkJoin } from 'rxjs';
-import { catchError, tap, shareReplay } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { catchError, shareReplay, tap } from 'rxjs/operators';
 
 import { Supplier } from './supplier';
 
@@ -10,12 +10,12 @@ import { Supplier } from './supplier';
   providedIn: 'root'
 })
 export class SupplierService {
-  private suppliersUrl = 'api/suppliers';
+  suppliersUrl = 'api/suppliers';
 
   // All Suppliers
   suppliers$ = this.http.get<Supplier[]>(this.suppliersUrl)
     .pipe(
-      tap(data => console.log('suppliers: ', JSON.stringify(data))),
+      tap(data => console.log('suppliers', data)),
       shareReplay(),
       catchError(this.handleError)
     );

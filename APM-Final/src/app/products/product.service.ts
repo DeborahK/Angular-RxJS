@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { of, throwError, Subject, merge, combineLatest, BehaviorSubject } from 'rxjs';
-import { catchError, tap, map, scan, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, from, of, merge, Subject, throwError } from 'rxjs';
+import { catchError, filter, map, mergeMap, scan, shareReplay, tap, toArray } from 'rxjs/operators';
 
 import { Product } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
@@ -63,17 +63,32 @@ export class ProductService {
   );
 
   // Suppliers for the selected product
+  // Finds suppliers from download of all suppliers
   selectedProductSuppliers$ = combineLatest(
     this.selectedProduct$,
     this.supplierService.suppliers$
   ).pipe(
-    map(([product, suppliers]: [Product, Supplier[]]) =>
+    map(([product, suppliers]) =>
       suppliers.filter(
         supplier => product ? product.supplierIds.includes(supplier.id) : of(null)
       )
     )
   );
 
+  // Suppliers for the selected product
+  // Only gets the suppliers it needs
+  selectedProductSuppliers2$ = this.selectedProduct$
+    .pipe(
+      filter(Boolean),
+      mergeMap(product =>
+        from(product.supplierIds)
+          .pipe(
+            mergeMap(supplierId =>
+              this.http.get<Supplier>(`${this.supplierService.suppliersUrl}/${supplierId}`)),
+            toArray()
+          )
+      )
+    );
   /*
 
     Allows adding of products to the Observable

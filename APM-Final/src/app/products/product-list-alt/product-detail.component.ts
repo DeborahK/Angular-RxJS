@@ -15,11 +15,12 @@ export class ProductDetailComponent {
   error$ = new Subject<string>();
 
   // Product to display
-  product$ = this.productService.selectedProduct$.pipe(
-    catchError(error => {
-      this.error$.next(error);
-      return of(null);
-    }));
+  product$ = this.productService.selectedProduct$
+    .pipe(
+      catchError(error => {
+        this.error$.next(error);
+        return of(null);
+      }));
 
   // Set the page title
   pageTitle$ = this.product$
@@ -29,11 +30,12 @@ export class ProductDetailComponent {
     );
 
   // Suppliers for this product
-  productSuppliers$ = this.productService.selectedProductSuppliers$.pipe(
-    catchError(error => {
-      this.error$.next(error);
-      return of(null);
-    }));
+  productSuppliers$ = this.productService.selectedProductSuppliers$
+    .pipe(
+      catchError(error => {
+        this.error$.next(error);
+        return of(null);
+      }));
 
   // Create a combined stream with the data used in the view
   // Use filter to skip if the product is null

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, throwError, forkJoin } from 'rxjs';
-import { catchError, tap, shareReplay } from 'rxjs/operators';
+import { forkJoin, Observable, of, throwError } from 'rxjs';
+import { catchError, concatMap, mergeMap, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import { Supplier } from './supplier';
 
@@ -13,7 +13,6 @@ export class SupplierService {
   private suppliersUrl = 'api/suppliers';
 
   // All Suppliers
-  // Not used by this app, but useful for supplier features
   suppliers$ = this.http.get<Supplier[]>(this.suppliersUrl)
     .pipe(
       tap(data => console.log('suppliers: ', JSON.stringify(data))),
@@ -21,6 +20,29 @@ export class SupplierService {
       catchError(this.handleError)
     );
 
+  suppliersWithConcatMap$ = of(1, 5, 8)
+    .pipe(
+      tap(item => console.log('concatMap outer Observable', item)),
+      concatMap(id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
+    ).subscribe(
+      item => console.log('concatMap inner Observable', item)
+    );
+
+  supplierWithMergeMap$ = of(1, 5, 8)
+    .pipe(
+      tap(item => console.log('mergeMap outer Observable', item)),
+      mergeMap(id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
+    ).subscribe(
+      item => console.log('mergeMap inner Observable', item)
+    );
+
+  supplierWithSwitchMap$ = of(1, 5, 8)
+    .pipe(
+      tap(item => console.log('switchMap outer Observable', item)),
+      switchMap(id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
+    ).subscribe(
+      item => console.log('switchMap inner Observable', item)
+    );
   constructor(private http: HttpClient) { }
 
   // Gets set of suppliers given a set of ids
