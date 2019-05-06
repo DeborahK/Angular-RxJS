@@ -111,17 +111,8 @@ export class ProductService {
       })
     );
 
-  addOne() {
-    this.productInsertAction.next({
-      id: 42,
-      productName: 'Another One',
-      productCode: 'TBX-0042',
-      description: 'Our new product',
-      price: 8.9,
-      categoryId: 3,
-      category: 'Toolbox',
-      quantityInStock: 30
-    });
+  addProduct() {
+    this.productInsertAction.next(this.fakeProduct());
   }
 
   constructor(private http: HttpClient,
@@ -131,6 +122,19 @@ export class ProductService {
   // Change the selected product
   changeSelectedProduct(selectedProductId: number | null): void {
     this.productSelectedAction.next(selectedProductId);
+  }
+
+  private fakeProduct() {
+    return {
+      id: 42,
+      productName: 'Another One',
+      productCode: 'TBX-0042',
+      description: 'Our new product',
+      price: 8.9,
+      categoryId: 3,
+      category: 'Toolbox',
+      quantityInStock: 30
+    };
   }
 
   private handleError(err: any) {

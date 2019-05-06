@@ -1,35 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap, shareReplay, mergeMap, pluck, distinct, toArray } from 'rxjs/operators';
-import { ProductCategory } from './product-category';
+import { throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductCategoryService {
   private productCategoriesUrl = 'api/productCategories';
-
-  // All product categories
-  // Instead of defining the http.get in a method in the service,
-  // set the observable directly
-  productCategories$ = this.http.get<ProductCategory[]>(this.productCategoriesUrl)
-    .pipe(
-      tap(data => console.log('categories', JSON.stringify(data))),
-      shareReplay(),
-      catchError((this.handleError))
-    );
-
-  // Categories for drop down list
-  categoryNames$ = this.productCategories$
-    .pipe(
-      mergeMap(categories => categories),
-      pluck('name'),
-      distinct(),
-      toArray(),
-      tap(c => console.log('Each category', c)),
-      shareReplay()
-    );
 
   constructor(private http: HttpClient) { }
 

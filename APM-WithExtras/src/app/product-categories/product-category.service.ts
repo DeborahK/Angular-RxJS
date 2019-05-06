@@ -20,16 +20,17 @@ export class ProductCategoryService {
       catchError((this.handleError))
     );
 
-  // // Categories for drop down list
-  // categoryNames$ = this.productCategories$
-  //   .pipe(
-  //     mergeAll(),
-  //     pluck('name'),
-  //     distinct(),
-  //     toArray(),
-  //     tap(c => console.log('Each category', c)),
-  //     shareReplay()
-  //   );
+  // Categories for drop down list
+  // Example of use pluck and distinct
+  categoryNames$ = this.productCategories$
+    .pipe(
+      mergeAll(),
+      pluck('name'),
+      distinct(),
+      toArray(),
+      tap(c => console.log('Each category', c)),
+      shareReplay()
+    );
 
   constructor(private http: HttpClient) { }
 

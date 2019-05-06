@@ -57,6 +57,6 @@ export class ProductListComponent {
   }
 
   onAdd() {
-    this.productService.addOne();
+    this.productService.addProduct();
   }
 }

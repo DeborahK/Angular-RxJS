@@ -9,7 +9,7 @@
       <button type='button'
               class='list-group-item'
               *ngFor='let product of products'
-              [ngClass]="{'active': product?.id === (selectedProductId$ | async)}"
+              [ngClass]="{'active': product?.id === selectedProductId}"
               (click)='onSelected(product.id)'>
         {{ product.productName }} ({{ product.categoryId }})
       </button>
@@ -20,5 +20,6 @@
 </div>
 
 <div class="alert alert-danger"
-     *ngIf="error$ | async as error">{{error}}
+     *ngIf="errorMessage">
+  {{errorMessage}}
 </div>

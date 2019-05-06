@@ -9,7 +9,9 @@
         <div class="col-3">
           <select class="form-control"
                   (change)="onSelected($event.target.value)">
-            <option value="">- Display All -</option>
+            <option value="0">- Display All -</option>
+            <option *ngFor="let category of categories"
+                    [value]="category.id">{{ category.name }}</option>
           </select>
         </div>
         <div class="col-2">
@@ -30,7 +32,6 @@
             <th>Category</th>
             <th>Price</th>
             <th>In Stock</th>
-            <th>Valuation</th>
           </tr>
         </thead>
         <tbody *ngFor="let product of products">
@@ -40,7 +41,6 @@
             <td>{{ product.categoryId }}</td>
             <td>{{ product.price | currency:"USD":"symbol":"1.2-2" }}</td>
             <td>{{ product.quantityInStock }}</td>
-            <td>{{ product.inventoryValuation | currency:"USD":"symbol":"1.2-2" }}</td>
           </tr>
         </tbody>
       </table>
@@ -49,7 +49,7 @@
   </div>
 </div>
 
-<div *ngIf="errorMessage"
-     class="alert alert-danger">
-  Error: {{ errorMessage }}
+<div class="alert alert-danger"
+     *ngIf="errorMessage">
+  {{ errorMessage }}
 </div>
