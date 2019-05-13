@@ -41,7 +41,7 @@ export class ProductService {
           } as Product) // <-- note the type here!
       )
     ),
-    shareReplay()
+    shareReplay(1)
   );
 
   // Default to no product selected
@@ -58,7 +58,7 @@ export class ProductService {
       products.find(product => product.id === selectedProductId)
     ),
     tap(product => console.log('selectedProduct', product)),
-    shareReplay(),
+    shareReplay(1),
     catchError(this.handleError)
   );
 
@@ -96,12 +96,12 @@ export class ProductService {
   */
 
   // Action Stream
-  private productInsertAction = new Subject<Product>();
+  private productInsertedAction$ = new Subject<Product>();
 
   // Merge the streams
   productsWithAdd$ = merge(
     this.productsWithCategory$,
-    this.productInsertAction
+    this.productInsertedAction$
   )
     .pipe(
       scan((acc: Product[], value: Product) => [...acc, value]),
@@ -111,16 +111,17 @@ export class ProductService {
       })
     );
 
-  addProduct() {
-    this.productInsertAction.next(this.fakeProduct());
-  }
-
   constructor(private http: HttpClient,
     private productCategoryService: ProductCategoryService,
     private supplierService: SupplierService) { }
 
+  addProduct(newProduct: Product = null) {
+    newProduct = newProduct || this.fakeProduct();
+    this.productInsertedAction$.next(newProduct);
+  }
+
   // Change the selected product
-  changeSelectedProduct(selectedProductId: number | null): void {
+  selectedProductChanged(selectedProductId: number | null): void {
     this.productSelectedAction.next(selectedProductId);
   }
 

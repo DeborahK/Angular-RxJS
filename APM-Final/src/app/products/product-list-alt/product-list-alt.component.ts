@@ -40,6 +40,6 @@ export class ProductListAltComponent {
   ) { }
 
   onSelected(productId: number): void {
-    this.productService.changeSelectedProduct(productId);
+    this.productService.selectedProductChanged(productId);
   }
 }

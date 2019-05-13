@@ -1,6 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+
 import { throwError } from 'rxjs';
+
+import { ProductCategory } from './product-category';
 
 @Injectable({
   providedIn: 'root'

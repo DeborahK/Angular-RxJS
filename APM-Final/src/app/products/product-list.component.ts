@@ -16,13 +16,13 @@ export class ProductListComponent {
   error$ = new Subject<string>();
 
   // Action stream
-  private selectCategoryAction = new BehaviorSubject<number>(0);
+  private categorySelectedAction = new BehaviorSubject<number>(0);
 
   // Merge Data stream with Action stream
   // To filter to the selected category
   products$ = combineLatest(
     this.productService.productsWithAdd$,
-    this.selectCategoryAction
+    this.categorySelectedAction
   )
     .pipe(
       map(([products, categoryId]) =>
@@ -53,7 +53,7 @@ export class ProductListComponent {
     private productCategoryService: ProductCategoryService) { }
 
   onSelected(categoryId: string): void {
-    this.selectCategoryAction.next(+categoryId);
+    this.categorySelectedAction.next(+categoryId);
   }
 
   onAdd() {
