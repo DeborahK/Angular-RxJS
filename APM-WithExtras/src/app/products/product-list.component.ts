@@ -14,12 +14,12 @@ export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
 
-  private selectCategoryAction = new BehaviorSubject<number>(0);
+  private categorySelectedAction = new BehaviorSubject<number>(0);
 
   // Or withLatestFrom
   products$ = combineLatest(
     this.productService.productsWithAdd$,
-    this.selectCategoryAction
+    this.categorySelectedAction
   )
     .pipe(
       tap(console.log),
@@ -35,6 +35,17 @@ export class ProductListComponent {
 
   // Categories for drop down list
   categories$ = this.productCategoryService.productCategories$;
+
+  // Combine all streams for the view
+  vm$ = combineLatest([
+    this.products$,
+    this.categories$
+  ])
+    .pipe(
+      map(([products, categories]) =>
+        ({ products, categories }))
+    );
+
 
   /*
     Code from prior examples
@@ -70,11 +81,11 @@ export class ProductListComponent {
   constructor(private productService: ProductService,
     private productCategoryService: ProductCategoryService) { }
 
-  onSelected(categoryId): void {
-    this.selectCategoryAction.next(+categoryId);
+  onSelected(categoryId: string): void {
+    this.categorySelectedAction.next(+categoryId);
   }
 
   onAdd() {
-    this.productService.addOne();
+    this.productService.addProduct();
   }
 }

@@ -16,12 +16,12 @@ export class ProductCategoryService {
   productCategories$ = this.http.get<ProductCategory[]>(this.productCategoriesUrl)
     .pipe(
       tap(data => console.log('categories', JSON.stringify(data))),
-      shareReplay(),
+      shareReplay(1),
       catchError((this.handleError))
     );
 
   // Categories for drop down list
-  // Example of use pluck and distinct
+  // Example of using pluck and distinct
   categoryNames$ = this.productCategories$
     .pipe(
       mergeAll(),

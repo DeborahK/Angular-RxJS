@@ -46,7 +46,7 @@ export class ProductService {
           } as Product) // <-- note the type here!
       )
     ),
-    shareReplay()
+    shareReplay(1)
   );
 
   productsWithCategory2$ = combineLatest(
@@ -71,7 +71,7 @@ export class ProductService {
   // ReplaySubject buffers the defined number of values, in this case 1.
   // Retains the currently selected product Id
   // Uses 0 for no selected product (can't use null because it is used as a route parameter)
-  private selectProductAction = new ReplaySubject<number>(1);
+  private productSelectedAction = new BehaviorSubject<number>(0);
   // Expose the selectedProduct as an observable for use by any components
   selectProductAction$ = this.selectProductAction.asObservable();
 
@@ -80,14 +80,14 @@ export class ProductService {
   // so use the shareReply to share it with any component that uses it
   // Location of the shareReplay matters ... won't share anything *after* the shareReplay
   selectedProduct$ = combineLatest(
-    this.selectProductAction$,
+    this.productSelectedAction,
     this.productsWithCategory$
   ).pipe(
     map(([selectedProductId, products]) =>
       products.find(product => product.id === selectedProductId)
     ),
     tap(product => console.log('selectedProduct', product)),
-    shareReplay(),
+    shareReplay(1),
     catchError(this.handleError)
   );
 
@@ -209,15 +209,17 @@ export class ProductService {
 
   /*
 
-Allows adding of products to the Observable
+    Allows adding of products to the Observable
 
-*/
-  private productInsertAction = new Subject<Product>();
-  productInsertAction$ = this.productInsertAction.asObservable();
+  */
 
+  // Action Stream
+  private productInsertedAction$ = new Subject<Product>();
+
+  // Merge the streams
   productsWithAdd$ = merge(
     this.productsWithCategory$,
-    this.productInsertAction
+    this.productInsertedAction$
   )
     .pipe(
       scan((acc: Product[], value: Product) => [...acc, value]),
@@ -227,8 +229,22 @@ Allows adding of products to the Observable
       })
     );
 
-  addOne() {
-    this.productInsertAction.next({
+  constructor(private http: HttpClient,
+    private productCategoryService: ProductCategoryService,
+    private supplierService: SupplierService) { }
+
+  addProduct(newProduct: Product = null) {
+    newProduct = newProduct || this.fakeProduct();
+    this.productInsertedAction$.next(newProduct);
+  }
+
+  // Change the selected product
+  selectedProductChanged(selectedProductId: number | null): void {
+    this.productSelectedAction.next(selectedProductId);
+  }
+
+  private fakeProduct() {
+    return {
       id: 42,
       productName: 'Another One',
       productCode: 'TBX-0042',
@@ -237,26 +253,7 @@ Allows adding of products to the Observable
       categoryId: 3,
       category: 'Toolbox',
       quantityInStock: 30
-    });
-  }
-
-  constructor(private http: HttpClient,
-    private productCategoryService: ProductCategoryService,
-    private supplierService: SupplierService) { }
-
-  // Change the selected product
-  changeSelectedProduct(selectedProductId: number | null): void {
-    this.selectProductAction.next(selectedProductId);
-  }
-
-  // @@@ Used?
-  getProductsByCategory(category: string): Observable<Product> {
-    return this.http.get<Product[]>(this.productsUrl)
-      .pipe(
-        mergeMap(item => item),
-        filter(item => item.category === category),
-        catchError(this.handleError)
-      );
+    };
   }
 
   private handleError(err: any) {

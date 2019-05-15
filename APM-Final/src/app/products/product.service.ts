@@ -6,23 +6,20 @@ import { catchError, filter, map, mergeMap, scan, shareReplay, tap, toArray } fr
 
 import { Product } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
-import { SupplierService } from '../suppliers/supplier.service';
 import { Supplier } from '../suppliers/supplier';
+import { SupplierService } from '../suppliers/supplier.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private productsUrl = 'api/products';
+  private suppliersUrl = this.supplierService.suppliersUrl;
 
-  // Retrieve products
   products$ = this.http.get<Product[]>(this.productsUrl)
     .pipe(
       tap(data => console.log('Products', JSON.stringify(data))),
-      catchError(err => {
-        console.error(err);
-        return throwError(err);
-      })
+      catchError(this.handleError)
     );
 
   // Combine products with categories
@@ -45,16 +42,16 @@ export class ProductService {
   );
 
   // Default to no product selected
-  private productSelectedAction = new BehaviorSubject<number>(0);
+  private productSelectedAction$ = new BehaviorSubject<number>(0);
 
   // Currently selected product
   // Used in both List and Detail pages,
   // so use the shareReply to share it with any component that uses it
   selectedProduct$ = combineLatest(
-    this.productSelectedAction,
-    this.productsWithCategory$
+    this.productsWithCategory$,
+    this.productSelectedAction$
   ).pipe(
-    map(([selectedProductId, products]) =>
+    map(([products, selectedProductId]) =>
       products.find(product => product.id === selectedProductId)
     ),
     tap(product => console.log('selectedProduct', product)),
@@ -115,14 +112,14 @@ export class ProductService {
     private productCategoryService: ProductCategoryService,
     private supplierService: SupplierService) { }
 
-  addProduct(newProduct: Product = null) {
+  addProduct(newProduct?: Product) {
     newProduct = newProduct || this.fakeProduct();
     this.productInsertedAction$.next(newProduct);
   }
 
   // Change the selected product
-  selectedProductChanged(selectedProductId: number | null): void {
-    this.productSelectedAction.next(selectedProductId);
+  selectedProductChanged(selectedProductId: number): void {
+    this.productSelectedAction$.next(selectedProductId);
   }
 
   private fakeProduct() {
