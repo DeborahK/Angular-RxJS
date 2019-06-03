@@ -13,6 +13,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   pageTitle = 'Product List';
   errorMessage = '';
   products: Product[] = [];
+  categories;
+
   sub: Subscription;
 
   constructor(private productService: ProductService) { }
