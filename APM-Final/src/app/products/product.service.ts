@@ -23,10 +23,10 @@ export class ProductService {
     );
 
   // Combine products with categories
-  productsWithCategory$ = combineLatest(
+  productsWithCategory$ = combineLatest([
     this.products$,
     this.productCategoryService.productCategories$
-  ).pipe(
+  ]).pipe(
     map(([products, categories]) =>
       products.map(
         product =>
@@ -47,10 +47,10 @@ export class ProductService {
   // Currently selected product
   // Used in both List and Detail pages,
   // so use the shareReply to share it with any component that uses it
-  selectedProduct$ = combineLatest(
+  selectedProduct$ = combineLatest([
     this.productsWithCategory$,
     this.productSelectedAction$
-  ).pipe(
+  ]).pipe(
     map(([products, selectedProductId]) =>
       products.find(product => product.id === selectedProductId)
     ),
@@ -61,10 +61,10 @@ export class ProductService {
 
   // Suppliers for the selected product
   // Finds suppliers from download of all suppliers
-  selectedProductSuppliers$ = combineLatest(
+  selectedProductSuppliers$ = combineLatest([
     this.selectedProduct$,
     this.supplierService.suppliers$
-  ).pipe(
+  ]).pipe(
     map(([product, suppliers]) =>
       suppliers.filter(
         supplier => product ? product.supplierIds.includes(supplier.id) : of(null)
@@ -109,8 +109,8 @@ export class ProductService {
     );
 
   constructor(private http: HttpClient,
-    private productCategoryService: ProductCategoryService,
-    private supplierService: SupplierService) { }
+              private productCategoryService: ProductCategoryService,
+              private supplierService: SupplierService) { }
 
   addProduct(newProduct?: Product) {
     newProduct = newProduct || this.fakeProduct();

@@ -20,10 +20,10 @@ export class ProductListComponent {
 
   // Merge Data stream with Action stream
   // To filter to the selected category
-  products$ = combineLatest(
+  products$ = combineLatest([
     this.productService.productsWithAdd$,
     this.categorySelectedAction$
-  )
+  ])
     .pipe(
       map(([products, selectedCategoryId]) =>
         products.filter(product =>
@@ -52,7 +52,7 @@ export class ProductListComponent {
 
 
   constructor(private productService: ProductService,
-    private productCategoryService: ProductCategoryService) { }
+              private productCategoryService: ProductCategoryService) { }
 
   onAdd(): void {
     this.productService.addProduct();
