@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { of, combineLatest } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { combineLatest, Subject, EMPTY } from 'rxjs';
+import { catchError, map, filter } from 'rxjs/operators';
 
 import { ProductService } from '../product.service';
 import { Product } from '../product';
@@ -13,15 +13,14 @@ import { Product } from '../product';
 })
 export class ProductListAltComponent {
   pageTitle = 'Products';
-
-  errorMessage = '';
+  error$ = new Subject<string>();
 
   // Products with their categories
   products$ = this.productService.productsWithCategory$
     .pipe(
       catchError(err => {
-        this.errorMessage = err;
-        return of(null);
+        this.error$.next(err);
+        return EMPTY;
       }));
 
   // Selected product to highlight the entry

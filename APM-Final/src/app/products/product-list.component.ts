@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { of, combineLatest, BehaviorSubject } from 'rxjs';
+import { combineLatest, BehaviorSubject, EMPTY, Subject } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { ProductService } from './product.service';
@@ -13,10 +13,11 @@ import { ProductCategoryService } from '../product-categories/product-category.s
 })
 export class ProductListComponent {
   pageTitle = 'Product List';
-  errorMessage = '';
+  error$ = new Subject<string>();
 
   // Action stream
-  private categorySelectedAction$ = new BehaviorSubject<number>(0);
+  private categorySelectedSubject = new BehaviorSubject<number>(0);
+  categorySelectedAction$ = this.categorySelectedSubject.asObservable();
 
   // Merge Data stream with Action stream
   // To filter to the selected category
@@ -32,13 +33,19 @@ export class ProductListComponent {
             true
         )),
       catchError(err => {
-        this.errorMessage = err;
-        return of(null);
+        this.error$.next(err);
+        return EMPTY;
       })
     );
 
   // Categories for drop down list
-  categories$ = this.productCategoryService.productCategories$;
+  categories$ = this.productCategoryService.productCategories$
+    .pipe(
+      catchError(err => {
+        this.error$.next(err);
+        return EMPTY;
+      })
+    );
 
   // Combine all streams for the view
   vm$ = combineLatest([
@@ -50,7 +57,6 @@ export class ProductListComponent {
         ({ products, categories }))
     );
 
-
   constructor(private productService: ProductService,
               private productCategoryService: ProductCategoryService) { }
 
@@ -59,7 +65,7 @@ export class ProductListComponent {
   }
 
   onSelected(categoryId: string): void {
-    this.categorySelectedAction$.next(+categoryId);
+    this.categorySelectedSubject.next(+categoryId);
   }
 
 }

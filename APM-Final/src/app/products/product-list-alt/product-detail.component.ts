@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { combineLatest, of } from 'rxjs';
-import { catchError, map, filter } from 'rxjs/operators';
+import { combineLatest, Subject, EMPTY } from 'rxjs';
+import { catchError, map, filter, tap } from 'rxjs/operators';
 
 import { ProductService } from '../product.service';
 import { Product } from '../product';
@@ -12,11 +12,10 @@ import { Product } from '../product';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductDetailComponent {
-  errorMessage = '';
+  error$ = new Subject<string>();
 
   // Product to display
   product$ = this.productService.selectedProduct$;
-
 
   // Set the page title
   pageTitle$ = this.product$
@@ -29,8 +28,8 @@ export class ProductDetailComponent {
   productSuppliers$ = this.productService.selectedProductSuppliers$
     .pipe(
       catchError(err => {
-        this.errorMessage = err;
-        return of(null);
+        this.error$.next(err);
+        return EMPTY;
       }));
 
   // Create a combined stream with the data used in the view

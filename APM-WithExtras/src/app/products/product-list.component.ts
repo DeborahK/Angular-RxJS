@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { ProductService } from './product.service';
-import { of, Subject, combineLatest, BehaviorSubject } from 'rxjs';
+import { of, Subject, combineLatest, BehaviorSubject, EMPTY } from 'rxjs';
 import { catchError, mergeMap, pluck, tap, distinct, toArray, filter, map, startWith, shareReplay, mergeAll } from 'rxjs/operators';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 
@@ -29,7 +29,7 @@ export class ProductListComponent {
       ),
       catchError(err => {
         this.errorMessage = err;
-        return of(null);
+        return EMPTY;
       })
     );
 

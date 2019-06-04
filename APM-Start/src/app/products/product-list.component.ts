@@ -12,9 +12,9 @@ import { ProductService } from './product.service';
 export class ProductListComponent implements OnInit, OnDestroy {
   pageTitle = 'Product List';
   errorMessage = '';
-  products: Product[] = [];
   categories;
 
+  products: Product[] = [];
   sub: Subscription;
 
   constructor(private productService: ProductService) { }

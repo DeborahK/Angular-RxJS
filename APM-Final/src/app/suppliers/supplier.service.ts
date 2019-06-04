@@ -15,7 +15,7 @@ export class SupplierService {
   // All Suppliers
   suppliers$ = this.http.get<Supplier[]>(this.suppliersUrl)
     .pipe(
-      tap(data => console.log('suppliers', data)),
+      tap(data => console.log('suppliers', JSON.stringify(data))),
       shareReplay(1),
       catchError(this.handleError)
     );

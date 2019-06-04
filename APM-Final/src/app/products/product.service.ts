@@ -55,15 +55,19 @@ export class ProductService {
       products.find(product => product.id === selectedProductId)
     ),
     tap(product => console.log('selectedProduct', product)),
-    shareReplay(1),
-    catchError(this.handleError)
+    shareReplay(1)
   );
 
   // Suppliers for the selected product
   // Finds suppliers from download of all suppliers
+  // Add a catchError so that the display appears
+  // even if the suppliers cannot be retrieved.
   selectedProductSuppliers$ = combineLatest([
     this.selectedProduct$,
     this.supplierService.suppliers$
+      .pipe(
+        catchError(err => of([] as Supplier[]))
+      )
   ]).pipe(
     map(([product, suppliers]) =>
       suppliers.filter(
@@ -81,7 +85,7 @@ export class ProductService {
         from(product.supplierIds)
           .pipe(
             mergeMap(supplierId =>
-              this.http.get<Supplier>(`${this.supplierService.suppliersUrl}/${supplierId}`)),
+              this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)),
             toArray()
           )
       )

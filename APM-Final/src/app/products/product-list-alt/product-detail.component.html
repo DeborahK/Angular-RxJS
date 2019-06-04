@@ -32,7 +32,8 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table mb-0">
+      <table class="table mb-0"
+             *ngIf="vm.productSuppliers">
         <thead>
           <tr>
             <th>Supplier</th>
@@ -54,6 +55,6 @@
 </div>
 
 <div class="alert alert-danger"
-     *ngIf="errorMessage">
-  {{errorMessage}}
+     *ngIf="error$ | async as error">
+  {{error}}
 </div>
