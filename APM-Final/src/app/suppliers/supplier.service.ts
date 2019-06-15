@@ -10,7 +10,7 @@ import { Supplier } from './supplier';
   providedIn: 'root'
 })
 export class SupplierService {
-  suppliersUrl = 'api/suppliers';
+  suppliersUrl = 'api/supplier';
 
   // All Suppliers
   suppliers$ = this.http.get<Supplier[]>(this.suppliersUrl)

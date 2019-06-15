@@ -13,7 +13,8 @@ import { ProductCategoryService } from '../product-categories/product-category.s
 })
 export class ProductListComponent {
   pageTitle = 'Product List';
-  error$ = new Subject<string>();
+  private errorMessageSubject = new Subject();
+  errorMessage$ = this.errorMessageSubject.asObservable();
 
   // Action stream
   private categorySelectedSubject = new BehaviorSubject<number>(0);
@@ -33,7 +34,7 @@ export class ProductListComponent {
             true
         )),
       catchError(err => {
-        this.error$.next(err);
+        this.errorMessageSubject.next(err);
         return EMPTY;
       })
     );
@@ -42,7 +43,7 @@ export class ProductListComponent {
   categories$ = this.productCategoryService.productCategories$
     .pipe(
       catchError(err => {
-        this.error$.next(err);
+        this.errorMessageSubject.next(err);
         return EMPTY;
       })
     );

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { BehaviorSubject, combineLatest, from, of, merge, Subject, throwError } from 'rxjs';
-import { catchError, filter, map, mergeMap, scan, shareReplay, tap, toArray } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, EMPTY, from, merge, Subject, throwError, of } from 'rxjs';
+import { catchError, filter, map, mergeMap, scan, shareReplay, tap, toArray, switchMap } from 'rxjs/operators';
 
 import { Product } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
@@ -16,6 +16,7 @@ export class ProductService {
   private productsUrl = 'api/products';
   private suppliersUrl = this.supplierService.suppliersUrl;
 
+  // All products
   products$ = this.http.get<Product[]>(this.productsUrl)
     .pipe(
       tap(data => console.log('Products', JSON.stringify(data))),
@@ -23,26 +24,29 @@ export class ProductService {
     );
 
   // Combine products with categories
+  // Map to the revised shape.
   productsWithCategory$ = combineLatest([
     this.products$,
     this.productCategoryService.productCategories$
   ]).pipe(
     map(([products, categories]) =>
-      products.map(
-        product =>
-          ({
-            ...product,
-            price: product.price * 1.5,
-            searchKey: [product.category],
-            category: categories.find(c => product.categoryId === c.id).name
-          } as Product) // <-- note the type here!
-      )
+      products.map(product => ({
+        ...product,
+        price: product.price * 1.5,
+        category: categories.find(
+          c => product.categoryId === c.id
+        ).name,
+        searchKey: [product.productName]
+      }) as Product)
     ),
     shareReplay(1)
   );
 
-  // Default to no product selected
-  private productSelectedAction$ = new BehaviorSubject<number>(0);
+  // Action stream for product selection
+  // Default to 0 for no product
+  // Must have a default so the stream emits at least once.
+  private productSelectedSubject = new BehaviorSubject<number>(0);
+  productSelectedAction$ = this.productSelectedSubject.asObservable();
 
   // Currently selected product
   // Used in both List and Detail pages,
@@ -62,6 +66,8 @@ export class ProductService {
   // Finds suppliers from download of all suppliers
   // Add a catchError so that the display appears
   // even if the suppliers cannot be retrieved.
+  // Note that it must return an empty array and not EMPTY
+  // or the stream will complete.
   selectedProductSuppliers$ = combineLatest([
     this.selectedProduct$,
     this.supplierService.suppliers$
@@ -69,9 +75,9 @@ export class ProductService {
         catchError(err => of([] as Supplier[]))
       )
   ]).pipe(
-    map(([product, suppliers]) =>
+    map(([selectedProduct, suppliers]) =>
       suppliers.filter(
-        supplier => product ? product.supplierIds.includes(supplier.id) : of(null)
+        supplier => selectedProduct ? selectedProduct.supplierIds.includes(supplier.id) : EMPTY
       )
     )
   );
@@ -80,24 +86,24 @@ export class ProductService {
   // Only gets the suppliers it needs
   selectedProductSuppliers2$ = this.selectedProduct$
     .pipe(
-      filter(Boolean),
-      mergeMap(product =>
-        from(product.supplierIds)
+      filter(selectedProduct => Boolean(selectedProduct)),
+      switchMap(selectedProduct =>
+        from(selectedProduct.supplierIds)
           .pipe(
-            mergeMap(supplierId =>
-              this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)),
-            toArray()
+            mergeMap(supplierId => this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)),
+            toArray(),
+            tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers)))
           )
       )
     );
+
   /*
-
     Allows adding of products to the Observable
-
   */
 
   // Action Stream
-  private productInsertedAction$ = new Subject<Product>();
+  private productInsertedSubject = new Subject<Product>();
+  productInsertedAction$ = this.productInsertedSubject.asObservable();
 
   // Merge the streams
   productsWithAdd$ = merge(
@@ -118,12 +124,12 @@ export class ProductService {
 
   addProduct(newProduct?: Product) {
     newProduct = newProduct || this.fakeProduct();
-    this.productInsertedAction$.next(newProduct);
+    this.productInsertedSubject.next(newProduct);
   }
 
   // Change the selected product
   selectedProductChanged(selectedProductId: number): void {
-    this.productSelectedAction$.next(selectedProductId);
+    this.productSelectedSubject.next(selectedProductId);
   }
 
   private fakeProduct() {
