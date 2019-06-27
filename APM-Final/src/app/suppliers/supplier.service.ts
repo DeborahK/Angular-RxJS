@@ -10,7 +10,7 @@ import { Supplier } from './supplier';
   providedIn: 'root'
 })
 export class SupplierService {
-  suppliersUrl = 'api/supplier';
+  suppliersUrl = 'api/suppliers';
 
   // All Suppliers
   suppliers$ = this.http.get<Supplier[]>(this.suppliersUrl)
@@ -28,39 +28,30 @@ export class SupplierService {
 
   suppliersWithConcatMap$ = of(1, 5, 8)
     .pipe(
-      tap(id => console.log('concatMap source Observable:', id)),
+      tap(id => console.log('concatMap source Observable', id)),
       concatMap(id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
     );
 
   suppliersWithMergeMap$ = of(1, 5, 8)
     .pipe(
-      tap(id => console.log('mergeMap source Observable:', id)),
+      tap(id => console.log('mergeMap source Observable', id)),
       mergeMap(id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
     );
 
   suppliersWithSwitchMap$ = of(1, 5, 8)
     .pipe(
-      tap(id => console.log('switchMap source Observable:', id)),
+      tap(id => console.log('switchMap source Observable', id)),
       switchMap(id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`))
     );
 
   constructor(private http: HttpClient) {
     // this.suppliersWithMap$
     //   .subscribe(o => o.subscribe(
-    //     item => console.log('map result:', item)
+    //     item => console.log('map result', item)
     //   ));
-
-    // this.suppliersWithConcatMap$.subscribe(
-    //   item => console.log('concatMap result:', item)
-    // )
-
-    // this.suppliersWithMergeMap$.subscribe(
-    //   item => console.log('mergeMap result:', item)
-    // )
-
-    // this.suppliersWithSwitchMap$.subscribe(
-    //   item => console.log('switchMap result:', item)
-    // )
+    // this.suppliersWithConcatMap$.subscribe(item => console.log('concatMap result', item));
+    // this.suppliersWithMergeMap$.subscribe(item => console.log('mergeMap result', item));
+    // this.suppliersWithSwitchMap$.subscribe(item => console.log('switchMap result', item));
   }
 
   private handleError(err: any) {

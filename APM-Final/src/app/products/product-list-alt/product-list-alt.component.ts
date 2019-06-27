@@ -13,7 +13,7 @@ import { Product } from '../product';
 })
 export class ProductListAltComponent {
   pageTitle = 'Products';
-  private errorMessageSubject = new Subject();
+  private errorMessageSubject = new Subject<string>();
   errorMessage$ = this.errorMessageSubject.asObservable();
 
   // Products with their categories

@@ -12,7 +12,7 @@ import { Product } from '../product';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductDetailComponent {
-  private errorMessageSubject = new Subject();
+  private errorMessageSubject = new Subject<string>();
   errorMessage$ = this.errorMessageSubject.asObservable();
 
   // Product to display
@@ -47,7 +47,6 @@ export class ProductDetailComponent {
     this.pageTitle$
   ])
     .pipe(
-      tap(x => console.log('in here')),
       filter(([product]) => Boolean(product)),
       map(([product, productSuppliers, pageTitle]) =>
         ({ product, productSuppliers, pageTitle }))

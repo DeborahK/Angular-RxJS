@@ -13,7 +13,7 @@ import { ProductCategoryService } from '../product-categories/product-category.s
 })
 export class ProductListComponent {
   pageTitle = 'Product List';
-  private errorMessageSubject = new Subject();
+  private errorMessageSubject = new Subject<string>();
   errorMessage$ = this.errorMessageSubject.asObservable();
 
   // Action stream
@@ -29,9 +29,7 @@ export class ProductListComponent {
     .pipe(
       map(([products, selectedCategoryId]) =>
         products.filter(product =>
-          selectedCategoryId ?
-            product.categoryId === selectedCategoryId :
-            true
+          selectedCategoryId ? product.categoryId === selectedCategoryId : true
         )),
       catchError(err => {
         this.errorMessageSubject.next(err);
