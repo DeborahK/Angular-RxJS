@@ -1,8 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
+import { combineLatest, BehaviorSubject, EMPTY, Subject } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+
 import { ProductService } from './product.service';
-import { of, Subject, combineLatest, BehaviorSubject, EMPTY } from 'rxjs';
-import { catchError, mergeMap, pluck, tap, distinct, toArray, filter, map, startWith, shareReplay, mergeAll } from 'rxjs/operators';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 
 @Component({
@@ -12,29 +13,38 @@ import { ProductCategoryService } from '../product-categories/product-category.s
 })
 export class ProductListComponent {
   pageTitle = 'Product List';
-  errorMessage = '';
+  private errorMessageSubject = new Subject<string>();
+  errorMessage$ = this.errorMessageSubject.asObservable();
 
-  private categorySelectedAction = new BehaviorSubject<number>(0);
+  // Action stream
+  private categorySelectedSubject = new BehaviorSubject<number>(0);
+  categorySelectedAction$ = this.categorySelectedSubject.asObservable();
 
-  // Or withLatestFrom
-  products$ = combineLatest(
+  // Merge Data stream with Action stream
+  // To filter to the selected category
+  products$ = combineLatest([
     this.productService.productsWithAdd$,
-    this.categorySelectedAction
-  )
+    this.categorySelectedAction$
+  ])
     .pipe(
-      tap(console.log),
-      map(([products, categoryId]) =>
+      map(([products, selectedCategoryId]) =>
         products.filter(product =>
-          categoryId ? product.categoryId === categoryId : true)
-      ),
+          selectedCategoryId ? product.categoryId === selectedCategoryId : true
+        )),
       catchError(err => {
-        this.errorMessage = err;
+        this.errorMessageSubject.next(err);
         return EMPTY;
       })
     );
 
   // Categories for drop down list
-  categories$ = this.productCategoryService.productCategories$;
+  categories$ = this.productCategoryService.productCategories$
+    .pipe(
+      catchError(err => {
+        this.errorMessageSubject.next(err);
+        return EMPTY;
+      })
+    );
 
   // Combine all streams for the view
   vm$ = combineLatest([
@@ -46,46 +56,15 @@ export class ProductListComponent {
         ({ products, categories }))
     );
 
-
-  /*
-    Code from prior examples
-  */
-  // productsJustProducts$ = this.productService.products$
-  //   .pipe(
-  //     catchError(err => {
-  //       this.errorMessage = err;
-  //       return of(null);
-  //     })
-  //   );
-
-  // Filter to defined category
-  // selectedCategoryId = 1;
-  // productsSimpleFilter2$ = this.productService.productsWithCategory$
-  //   .pipe(
-  //     mergeAll(),
-  //     filter(product => product.categoryId === this.selectedCategoryId),
-  //     toArray(),
-  //     catchError(err => {
-  //       this.errorMessage = err;
-  //       return of(null);
-  //     })
-  //   );
-
-  // productsSimpleFilter$ = this.productService.productsWithCategory$
-  //   .pipe(
-  //     map(products =>
-  //       products.filter(product => product.categoryId === this.selectedCategoryId)
-  //     )
-  //   );
-
   constructor(private productService: ProductService,
-    private productCategoryService: ProductCategoryService) { }
+              private productCategoryService: ProductCategoryService) { }
 
-  onSelected(categoryId: string): void {
-    this.categorySelectedAction.next(+categoryId);
-  }
-
-  onAdd() {
+  onAdd(): void {
     this.productService.addProduct();
   }
+
+  onSelected(categoryId: string): void {
+    this.categorySelectedSubject.next(+categoryId);
+  }
+
 }

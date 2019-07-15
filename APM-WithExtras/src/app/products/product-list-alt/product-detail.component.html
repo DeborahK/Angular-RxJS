@@ -1,5 +1,5 @@
 <div class="card"
-     *ngIf="vm$ | async  as vm ">
+     *ngIf="vm$ | async as vm">
   <div class="card-header">
     {{vm.pageTitle}}
   </div>
@@ -33,7 +33,7 @@
 
     <div class="table-responsive">
       <table class="table mb-0"
-             *ngIf="vm.productSuppliers">
+             *ngIf="vm.productSuppliers && vm.productSuppliers.length">
         <thead>
           <tr>
             <th>Supplier</th>
@@ -55,6 +55,6 @@
 </div>
 
 <div class="alert alert-danger"
-     *ngIf="error$ | async as error">
-  {{error}}
+     *ngIf="errorMessage$ | async as errorMessage">
+  {{errorMessage}}
 </div>

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { combineLatest, of, Subject } from 'rxjs';
-import { catchError, map, filter } from 'rxjs/operators';
+import { combineLatest, EMPTY, Subject } from 'rxjs';
+import { catchError, map, filter, tap } from 'rxjs/operators';
 
 import { ProductService } from '../product.service';
 import { Product } from '../product';
@@ -12,15 +12,17 @@ import { Product } from '../product';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductDetailComponent {
-  error$ = new Subject<string>();
+  private errorMessageSubject = new Subject<string>();
+  errorMessage$ = this.errorMessageSubject.asObservable();
 
   // Product to display
   product$ = this.productService.selectedProduct$
     .pipe(
-      catchError(error => {
-        this.error$.next(error);
-        return of(null);
-      }));
+      catchError(err => {
+        this.errorMessageSubject.next(err);
+        return EMPTY;
+      })
+    );
 
   // Set the page title
   pageTitle$ = this.product$
@@ -32,9 +34,9 @@ export class ProductDetailComponent {
   // Suppliers for this product
   productSuppliers$ = this.productService.selectedProductSuppliers$
     .pipe(
-      catchError(error => {
-        this.error$.next(error);
-        return of(null);
+      catchError(err => {
+        this.errorMessageSubject.next(err);
+        return EMPTY;
       }));
 
   // Create a combined stream with the data used in the view
@@ -45,7 +47,7 @@ export class ProductDetailComponent {
     this.pageTitle$
   ])
     .pipe(
-      filter(([product]) => !!product),
+      filter(([product]) => Boolean(product)),
       map(([product, productSuppliers, pageTitle]) =>
         ({ product, productSuppliers, pageTitle }))
     );
