@@ -60,7 +60,8 @@ export class ProductListComponent {
               private productCategoryService: ProductCategoryService) { }
 
   onAdd(): void {
-    this.productService.addProduct();
+    // Could use an async pipe for put/post
+     this.productService.createProduct().subscribe();
   }
 
   onSelected(categoryId: string): void {

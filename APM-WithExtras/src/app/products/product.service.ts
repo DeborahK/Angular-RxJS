@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { BehaviorSubject, combineLatest, EMPTY, from, merge, Subject, throwError, of } from 'rxjs';
 import {
@@ -118,7 +118,8 @@ export class ProductService {
     this.productInsertedAction$
   )
     .pipe(
-      scan((acc: Product[], value: Product) => [...acc, value])
+      scan((acc: Product[], value: Product) => [...acc, value]),
+      shareReplay(1)
     );
 
   /*
@@ -218,8 +219,8 @@ export class ProductService {
   /* END */
 
   constructor(private http: HttpClient,
-              private productCategoryService: ProductCategoryService,
-              private supplierService: SupplierService) {
+    private productCategoryService: ProductCategoryService,
+    private supplierService: SupplierService) {
     // To try out each of the additional examples
     // (which are not currently bound in the UI)
     // this.productsWithIncreasedPrice$.subscribe(console.log);
@@ -231,8 +232,7 @@ export class ProductService {
     // this.productsOneByOne$.subscribe(console.log);
   }
 
-  addProduct(newProduct?: Product) {
-    newProduct = newProduct || this.fakeProduct();
+  private addProduct(newProduct: Product) {
     this.productInsertedSubject.next(newProduct);
   }
 
@@ -270,4 +270,21 @@ export class ProductService {
     return throwError(errorMessage);
   }
 
+  /*
+    Additional examples, not included in the course
+  */
+
+  // Use http post to create a new product
+  createProduct(newProduct?: Product) {
+    newProduct = newProduct || this.fakeProduct();
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    newProduct.id = null;
+    return this.http.post<Product>(this.productsUrl, newProduct, { headers: headers })
+      .pipe(
+        tap(product => console.log('Created product',  JSON.stringify(product))),
+        tap(product => this.addProduct(product)),
+        catchError(this.handleError)
+      );
+  }
+  /* END */
 }
