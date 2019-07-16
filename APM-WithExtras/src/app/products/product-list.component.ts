@@ -46,7 +46,7 @@ export class ProductListComponent {
       })
     );
 
-  // Combine all streams for the view
+  // Combine the streams for the view
   vm$ = combineLatest([
     this.products$,
     this.categories$
@@ -60,8 +60,7 @@ export class ProductListComponent {
               private productCategoryService: ProductCategoryService) { }
 
   onAdd(): void {
-    // Could use an async pipe for put/post
-     this.productService.createProduct().subscribe();
+    this.productService.addProduct();
   }
 
   onSelected(categoryId: string): void {

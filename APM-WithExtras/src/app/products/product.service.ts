@@ -45,6 +45,31 @@ export class ProductService {
     shareReplay(1)
   );
 
+  // Action Stream for adding products to the Observable
+  private productInsertedSubject = new Subject<Product>();
+  productInsertedAction$ = this.productInsertedSubject.asObservable();
+
+  // Add the newly added product via http post with concatMap
+  // And then to the full list of products with scan.
+  productsWithAdd$ = merge(
+    this.productsWithCategory$,
+    this.productInsertedAction$
+      .pipe(
+        concatMap(newProduct => {
+          const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+          newProduct.id = null;
+          return this.http.post<Product>(this.productsUrl, newProduct, { headers: headers })
+            .pipe(
+              tap(product => console.log('Created product', JSON.stringify(product))),
+              catchError(this.handleError)
+            );
+        }),
+      ))
+    .pipe(
+      scan((acc: Product[], value: Product) => [...acc, value]),
+      shareReplay(1)
+    );
+
   // Action stream for product selection
   // Default to 0 for no product
   // Must have a default so the stream emits at least once.
@@ -57,7 +82,7 @@ export class ProductService {
   // so use the shareReply to share it with any component that uses it
   // Location of the shareReplay matters ... won't share anything *after* the shareReplay
   selectedProduct$ = combineLatest([
-    this.productsWithCategory$,
+    this.productsWithAdd$,
     this.productSelectedAction$
   ]).pipe(
     map(([products, selectedProductId]) =>
@@ -102,24 +127,6 @@ export class ProductService {
             tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers)))
           )
       )
-    );
-
-  /*
-    Allows adding of products to the Observable
-  */
-
-  // Action Stream
-  private productInsertedSubject = new Subject<Product>();
-  productInsertedAction$ = this.productInsertedSubject.asObservable();
-
-  // Merge the streams
-  productsWithAdd$ = merge(
-    this.productsWithCategory$,
-    this.productInsertedAction$
-  )
-    .pipe(
-      scan((acc: Product[], value: Product) => [...acc, value]),
-      shareReplay(1)
     );
 
   /*
@@ -219,8 +226,8 @@ export class ProductService {
   /* END */
 
   constructor(private http: HttpClient,
-    private productCategoryService: ProductCategoryService,
-    private supplierService: SupplierService) {
+              private productCategoryService: ProductCategoryService,
+              private supplierService: SupplierService) {
     // To try out each of the additional examples
     // (which are not currently bound in the UI)
     // this.productsWithIncreasedPrice$.subscribe(console.log);
@@ -232,7 +239,8 @@ export class ProductService {
     // this.productsOneByOne$.subscribe(console.log);
   }
 
-  private addProduct(newProduct: Product) {
+  addProduct(newProduct?: Product) {
+    newProduct = newProduct || this.fakeProduct();
     this.productInsertedSubject.next(newProduct);
   }
 
@@ -250,7 +258,8 @@ export class ProductService {
       price: 8.9,
       categoryId: 3,
       category: 'Toolbox',
-      quantityInStock: 30
+      quantityInStock: 30,
+      supplierIds: [5, 7, 8]
     };
   }
 
@@ -270,21 +279,4 @@ export class ProductService {
     return throwError(errorMessage);
   }
 
-  /*
-    Additional examples, not included in the course
-  */
-
-  // Use http post to create a new product
-  createProduct(newProduct?: Product) {
-    newProduct = newProduct || this.fakeProduct();
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    newProduct.id = null;
-    return this.http.post<Product>(this.productsUrl, newProduct, { headers: headers })
-      .pipe(
-        tap(product => console.log('Created product',  JSON.stringify(product))),
-        tap(product => this.addProduct(product)),
-        catchError(this.handleError)
-      );
-  }
-  /* END */
 }
