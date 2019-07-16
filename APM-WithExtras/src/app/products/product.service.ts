@@ -51,14 +51,14 @@ export class ProductService {
 
   // Add the newly added product via http post with concatMap
   // And then to the full list of products with scan.
+  headers = new HttpHeaders({ 'Content-Type': 'application/json' });
   productsWithAdd$ = merge(
     this.productsWithCategory$,
     this.productInsertedAction$
       .pipe(
         concatMap(newProduct => {
-          const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
           newProduct.id = null;
-          return this.http.post<Product>(this.productsUrl, newProduct, { headers: headers })
+          return this.http.post<Product>(this.productsUrl, newProduct, { headers: this.headers })
             .pipe(
               tap(product => console.log('Created product', JSON.stringify(product))),
               catchError(this.handleError)
