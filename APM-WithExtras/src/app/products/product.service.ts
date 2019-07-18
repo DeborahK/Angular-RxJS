@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { BehaviorSubject, combineLatest, EMPTY, from, merge, Subject, throwError, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, from, merge, Subject, throwError, of, forkJoin } from 'rxjs';
 import {
   catchError, filter, map, mergeMap, scan, shareReplay, tap, toArray, switchMap,
   mergeAll, max, reduce, concatMap, delay
@@ -114,8 +114,8 @@ export class ProductService {
 
   // Suppliers for the selected product
   // Only gets the suppliers it needs
-  // SwitchMap here instead of mergeMap so quickly clicking on
-  // the items cancels prior requests.
+  // switchMap here instead of mergeMap so quickly clicking on the items cancels prior requests.
+  // Using mergeMap and toArray
   selectedProductSuppliers2$ = this.selectedProduct$
     .pipe(
       filter(selectedProduct => Boolean(selectedProduct)),
@@ -127,6 +127,19 @@ export class ProductService {
             tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers)))
           )
       )
+    );
+
+  // Suppliers for the selected product
+  // Only gets the suppliers it needs
+  // switchMap here instead of mergeMap so quickly clicking on the items cancels prior requests.
+  // Using forkJoin
+  selectedProductSuppliers3$ = this.selectedProduct$
+    .pipe(
+      filter(selectedProduct => Boolean(selectedProduct)),
+      switchMap(selectedProduct =>
+        forkJoin(selectedProduct.supplierIds.map(supplierId => this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)))
+      ),
+      tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers)))
     );
 
   /*
