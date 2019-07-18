@@ -11,7 +11,21 @@ export class ProductData {
       price: 19.95,
       categoryId: 1,
       quantityInStock: 15,
-      supplierIds: [1, 2]
+      supplierIds: [1, 2],
+      suppliers: [
+        {
+          id: 1,
+          name: 'Acme Gardening Supply',
+          cost: 16.95,
+          minQuantity: 12
+        },
+        {
+          id: 2,
+          name: 'Standard Gardening',
+          cost: 15.95,
+          minQuantity: 24
+        }
+      ]
     },
     {
       id: 2,
@@ -21,7 +35,21 @@ export class ProductData {
       price: 32.99,
       categoryId: 1,
       quantityInStock: 2,
-      supplierIds: [3, 4]
+      supplierIds: [3, 4],
+      suppliers: [
+        {
+          id: 3,
+          name: 'Acme Gardening Supply',
+          cost: 12,
+          minQuantity: 6
+        },
+        {
+          id: 4,
+          name: 'Acme General Supply',
+          cost: 25,
+          minQuantity: 2
+        }
+      ]
     },
     {
       id: 5,

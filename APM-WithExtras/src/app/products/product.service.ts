@@ -10,7 +10,7 @@ import {
 import { Product, ProductClass } from './product';
 import { ProductFromAPI } from './product-data-fromAPI';
 import { ProductCategoryService } from '../product-categories/product-category.service';
-import { Supplier } from '../suppliers/supplier';
+import { Supplier, SupplierClass } from '../suppliers/supplier';
 import { SupplierService } from '../suppliers/supplier.service';
 
 @Injectable({
@@ -200,6 +200,17 @@ export class ProductService {
       catchError(this.handleError)
     );
 
+  // Demonstrates multiple levels of the object graph
+  productsClassInstanceMultipleLevels$ = this.http.get<ProductClass[]>(this.productsUrl)
+    .pipe(
+      map(products => products.map(product => Object.assign(new ProductClass(), {
+        ...product,
+        suppliers: (product.suppliers ? product.suppliers.map(supplier => Object.assign(new SupplierClass(), {
+          ...supplier
+        })) : [])
+      })))
+    );
+
   // Returns the product with the highest price
   productMax$ = this.productsWithCategory$
     .pipe(
@@ -234,6 +245,7 @@ export class ProductService {
     // this.productsFromAPI1$.subscribe(console.log);
     // this.productsFromAPI2$.subscribe(console.log);
     // this.productsClassInstance$.subscribe(console.log);
+    // this.productsClassInstanceMultipleLevels$.subscribe(console.log);
     // this.productMax$.subscribe(console.log);
     // this.productsTotal$.subscribe(console.log);
     // this.productsOneByOne$.subscribe(console.log);
