@@ -129,6 +129,10 @@ export class ProductService {
       )
     );
 
+  /*
+    Additional examples, not included in the course
+  */
+
   // Suppliers for the selected product
   // Only gets the suppliers it needs
   // switchMap here instead of mergeMap so quickly clicking on the items cancels prior requests.
@@ -142,9 +146,42 @@ export class ProductService {
       tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers)))
     );
 
-  /*
-    Additional examples, not included in the course
-  */
+  // Suppliers for all products
+  // Gets all products and all suppliers and merges them
+  allProductsAndSuppliers$ = combineLatest([
+    this.productsWithCategory$,
+    this.supplierService.suppliers$
+      .pipe(
+        catchError(err => of([] as Supplier[]))
+      )
+  ]).pipe(
+    map(([products, suppliers]) =>
+      products.map(product => ({
+        ...product,
+        suppliers: product.suppliers = suppliers.filter(
+          supplier => product.supplierIds.includes(supplier.id)
+        )
+      }) as Product)
+    )
+  );
+
+  // Suppliers for all products
+  // Gets all products and then the suppliers for each product
+  // (Seems this would be less efficient than allProductsAndSuppliers$)
+  allProductsAndSuppliers2$ = this.productsWithCategory$
+    .pipe(
+      switchMap(products => forkJoin(
+        products.map(product =>
+          forkJoin(product.supplierIds.map(supplierId => this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)))
+            .pipe(
+              map(suppliers => ({
+                ...product,
+                suppliers: suppliers
+              } as Product))
+            )
+        ))
+      )
+    );
 
   // Retrieve products and map to increase price using mergeMap
   productsWithIncreasedPrice$ = this.productsWithCategory$
@@ -250,10 +287,12 @@ export class ProductService {
   /* END */
 
   constructor(private http: HttpClient,
-              private productCategoryService: ProductCategoryService,
-              private supplierService: SupplierService) {
+    private productCategoryService: ProductCategoryService,
+    private supplierService: SupplierService) {
     // To try out each of the additional examples
     // (which are not currently bound in the UI)
+    // this.allProductsAndSuppliers$.subscribe(console.log);
+    // this.allProductsAndSuppliers2$.subscribe(console.log);
     // this.productsWithIncreasedPrice$.subscribe(console.log);
     // this.productsFromAPI1$.subscribe(console.log);
     // this.productsFromAPI2$.subscribe(console.log);
