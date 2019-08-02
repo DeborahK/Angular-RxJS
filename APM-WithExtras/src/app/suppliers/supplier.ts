@@ -6,7 +6,7 @@ export interface Supplier {
   minQuantity: number;
 }
 
-// Provided to demonstrate how to map to 
+// Provided to demonstrate how to map to
 // class instances.
 export class SupplierClass {
   id: number;

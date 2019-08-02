@@ -13,6 +13,13 @@ export interface Product {
   searchKey?: string[];
   supplierIds?: number[];
   suppliers?: Supplier[]; // To demonstrate a nested object graph
+  status?: statusCode;    // Identifies current status of the item
+}
+
+export enum statusCode {
+  Added,
+  Deleted,
+  Updated
 }
 
 export interface ProductResolved {
@@ -20,7 +27,7 @@ export interface ProductResolved {
   error?: any;
 }
 
-// Provided to demonstrate how to map to 
+// Provided to demonstrate how to map to
 // class instances.
 export class ProductClass {
   id: number;

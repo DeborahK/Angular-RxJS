@@ -7,7 +7,7 @@ import {
   mergeAll, max, reduce, concatMap, delay
 } from 'rxjs/operators';
 
-import { Product, ProductClass } from './product';
+import { Product, ProductClass, statusCode } from './product';
 import { ProductFromAPI } from './product-data-fromAPI';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 import { Supplier, SupplierClass } from '../suppliers/supplier';
@@ -284,11 +284,76 @@ export class ProductService {
       concatMap(item => of(item).pipe(delay(500))),
       catchError(this.handleError)
     );
+
+  // Action Stream for adding/updating/deleting products
+  private productModifiedSubject = new Subject<Product>();
+  productModifiedAction$ = this.productModifiedSubject.asObservable();
+
+  // Save the product via http
+  // And then modify the full list of products with scan.
+  productsWithCRUD$ = merge(
+    this.productsWithCategory$,
+    this.productModifiedAction$
+      .pipe(
+        concatMap(product => this.saveProduct(product)),
+      ))
+    .pipe(
+      scan((products: Product[], product: Product) => this.modifyProducts(products, product)),
+      shareReplay(1)
+    );
+
+  // Support methods
+  // Save the product to the backend server
+  // NOTE: This could be broken into three additional methods.
+  saveProduct(product: Product) {
+    if (product.status === statusCode.Added) {
+      product.id = null;
+      return this.http.post<Product>(this.productsUrl, product, { headers: this.headers })
+        .pipe(
+          tap(data => console.log('Created product', JSON.stringify(data))),
+          catchError(this.handleError)
+        );
+    }
+    if (product.status === statusCode.Deleted) {
+      const url = `${this.productsUrl}/${product.id}`;
+      return this.http.delete<Product>(url, { headers: this.headers })
+        .pipe(
+          tap(data => console.log('Deleted product', product)),
+          // return the original product
+          map(() => product),
+          catchError(this.handleError)
+        );
+    }
+    if (product.status === statusCode.Updated) {
+      const url = `${this.productsUrl}/${product.id}`;
+      return this.http.put<Product>(url, product, { headers: this.headers })
+        .pipe(
+          tap(data => console.log('Updated Product: ' + JSON.stringify(product))),
+          // return the original product
+          map(() => product),
+          catchError(this.handleError)
+        );
+    }
+  }
+
+  // Modify the array of products
+  modifyProducts(products: Product[], product: Product) {
+    console.log(product);
+    if (product.status === statusCode.Added) {
+      return [...products, product];
+    }
+    if (product.status === statusCode.Deleted) {
+      return products.filter(p => p.id !== product.id);
+    }
+    if (product.status === statusCode.Updated) {
+      return products.map(p => p.id === product.id ? { ...product } : p);
+    }
+  }
   /* END */
 
   constructor(private http: HttpClient,
-    private productCategoryService: ProductCategoryService,
-    private supplierService: SupplierService) {
+              private productCategoryService: ProductCategoryService,
+              private supplierService: SupplierService) {
     // To try out each of the additional examples
     // (which are not currently bound in the UI)
     // this.allProductsAndSuppliers$.subscribe(console.log);
@@ -306,6 +371,25 @@ export class ProductService {
   addProduct(newProduct?: Product) {
     newProduct = newProduct || this.fakeProduct();
     this.productInsertedSubject.next(newProduct);
+
+    // Alternate technique
+    newProduct.status = statusCode.Added;
+    this.productModifiedSubject.next(newProduct);
+  }
+
+  deleteProduct(selectedProduct: Product) {
+    // Update a copy of the selected product
+    const deletedProduct = { ...selectedProduct };
+    deletedProduct.status = statusCode.Deleted;
+    this.productModifiedSubject.next(deletedProduct);
+  }
+
+  updateProduct(selectedProduct: Product) {
+    // Update a copy of the selected product
+    const updatedProduct = { ...selectedProduct };
+    updatedProduct.quantityInStock += 1;
+    updatedProduct.status = statusCode.Updated;
+    this.productModifiedSubject.next(updatedProduct);
   }
 
   // Change the selected product

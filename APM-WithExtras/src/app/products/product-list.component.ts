@@ -5,6 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 
 import { ProductService } from './product.service';
 import { ProductCategoryService } from '../product-categories/product-category.service';
+import { Product } from './product';
 
 @Component({
   templateUrl: './product-list.component.html',
@@ -23,7 +24,7 @@ export class ProductListComponent {
   // Merge Data stream with Action stream
   // To filter to the selected category
   products$ = combineLatest([
-    this.productService.productsWithAdd$,
+    this.productService.productsWithCRUD$,
     this.categorySelectedAction$
   ])
     .pipe(
@@ -63,8 +64,16 @@ export class ProductListComponent {
     this.productService.addProduct();
   }
 
+  onDelete(product: Product): void {
+    this.productService.deleteProduct(product);
+  }
+
   onSelected(categoryId: string): void {
     this.categorySelectedSubject.next(+categoryId);
+  }
+
+  onUpdate(product: Product): void {
+    this.productService.updateProduct(product);
   }
 
 }
