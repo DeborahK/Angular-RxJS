@@ -13,10 +13,11 @@ export interface Product {
   searchKey?: string[];
   supplierIds?: number[];
   suppliers?: Supplier[]; // To demonstrate a nested object graph
-  status?: statusCode;    // Identifies current status of the item
+  status?: StatusCode;    // Identifies current status of the item
 }
 
-export enum statusCode {
+export enum StatusCode {
+  Unchanged,
   Added,
   Deleted,
   Updated
