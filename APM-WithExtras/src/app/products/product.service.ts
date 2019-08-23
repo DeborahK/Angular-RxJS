@@ -21,7 +21,7 @@ export class ProductService {
   private suppliersUrl = this.supplierService.suppliersUrl;
 
   // All products
-  productsOriginal$ = this.http.get<Product[]>(this.productsUrl)
+  products$ = this.http.get<Product[]>(this.productsUrl)
     .pipe(
       tap(data => console.log('Products', JSON.stringify(data))),
       catchError(this.handleError)
@@ -30,7 +30,7 @@ export class ProductService {
   // To support a refresh feature
   private refresh = new BehaviorSubject<boolean>(true);
 
-  products$ = this.refresh
+  products2$ = this.refresh
     .pipe(
       mergeMap(() => this.http.get<Product[]>(this.productsUrl)
         .pipe(
