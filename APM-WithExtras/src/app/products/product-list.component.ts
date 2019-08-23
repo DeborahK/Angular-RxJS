@@ -68,6 +68,10 @@ export class ProductListComponent {
     this.productService.deleteProduct(product);
   }
 
+  onRefresh(): void {
+    this.productService.refreshData();
+  }
+
   onSelected(categoryId: string): void {
     this.categorySelectedSubject.next(+categoryId);
   }

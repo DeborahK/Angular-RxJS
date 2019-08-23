@@ -21,11 +21,23 @@ export class ProductService {
   private suppliersUrl = this.supplierService.suppliersUrl;
 
   // All products
-  products$ = this.http.get<Product[]>(this.productsUrl)
+  productsOriginal$ = this.http.get<Product[]>(this.productsUrl)
     .pipe(
       tap(data => console.log('Products', JSON.stringify(data))),
       catchError(this.handleError)
     );
+
+  // To support a refresh feature
+  private refresh = new BehaviorSubject<boolean>(true);
+
+  products$ = this.refresh
+    .pipe(
+      mergeMap(() => this.http.get<Product[]>(this.productsUrl)
+        .pipe(
+          tap(data => console.log('Products', JSON.stringify(data))),
+          catchError(this.handleError)
+        )
+      ));
 
   // Combine products with categories
   // Map to the revised shape.
@@ -352,8 +364,8 @@ export class ProductService {
   /* END */
 
   constructor(private http: HttpClient,
-              private productCategoryService: ProductCategoryService,
-              private supplierService: SupplierService) {
+    private productCategoryService: ProductCategoryService,
+    private supplierService: SupplierService) {
     // To try out each of the additional examples
     // (which are not currently bound in the UI)
     // this.allProductsAndSuppliers$.subscribe(console.log);
@@ -395,6 +407,11 @@ export class ProductService {
   // Change the selected product
   selectedProductChanged(selectedProductId: number): void {
     this.productSelectedSubject.next(selectedProductId);
+  }
+
+  // Refresh the data.
+  refreshData(): void {
+    this.refresh.next(true);
   }
 
   private fakeProduct() {
