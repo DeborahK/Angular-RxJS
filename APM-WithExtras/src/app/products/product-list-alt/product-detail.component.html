@@ -31,7 +31,8 @@
       <div class="col-md-6">{{vm.product.quantityInStock}}</div>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive"
+          *ngIf="!(isLoading$ | async)">
       <table class="table mb-0"
              *ngIf="vm.productSuppliers && vm.productSuppliers.length">
         <thead>

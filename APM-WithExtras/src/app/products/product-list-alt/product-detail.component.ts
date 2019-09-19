@@ -32,13 +32,16 @@ export class ProductDetailComponent {
     );
 
   // Suppliers for this product
-  productSuppliers$ = this.productService.selectedProductSuppliers$
+  productSuppliers$ = this.productService.selectedProductSuppliers3$
     .pipe(
       catchError(err => {
         this.errorMessageSubject.next(err);
         return EMPTY;
       }));
 
+  // Whether data is currently loading
+  isLoading$ = this.productService.isLoadingAction$;
+  
   // Create a combined stream with the data used in the view
   // Use filter to skip if the product is null
   vm$ = combineLatest([
