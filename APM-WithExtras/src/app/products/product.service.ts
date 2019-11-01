@@ -156,12 +156,13 @@ export class ProductService {
   selectedProductSuppliers3$ = this.selectedProduct$
     .pipe(
       filter(selectedProduct => Boolean(selectedProduct)),
-      tap(() => this.isLoadingSubject.next(true)),
+      // tap(() => this.isLoadingSubject.next(true)),
+      tap(product => console.log('product', JSON.stringify(product))),
       switchMap(selectedProduct =>
         forkJoin(selectedProduct.supplierIds.map(supplierId => this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)))
       ),
       tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers))),
-      tap(() => this.isLoadingSubject.next(false))
+      // tap(() => this.isLoadingSubject.next(false))
     );
 
   // Suppliers for all products
