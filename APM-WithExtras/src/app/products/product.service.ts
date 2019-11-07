@@ -145,10 +145,6 @@ export class ProductService {
     Additional examples, not included in the course
   */
 
-  // Action stream for loading
-  private isLoadingSubject = new BehaviorSubject<boolean>(false);
-  isLoadingAction$ = this.isLoadingSubject.asObservable();
-
   // Suppliers for the selected product
   // Only gets the suppliers it needs
   // switchMap here instead of mergeMap so quickly clicking on the items cancels prior requests.
@@ -156,13 +152,28 @@ export class ProductService {
   selectedProductSuppliers3$ = this.selectedProduct$
     .pipe(
       filter(selectedProduct => Boolean(selectedProduct)),
-      // tap(() => this.isLoadingSubject.next(true)),
       tap(product => console.log('product', JSON.stringify(product))),
       switchMap(selectedProduct =>
         forkJoin(selectedProduct.supplierIds.map(supplierId => this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)))
       ),
       tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers))),
-      // tap(() => this.isLoadingSubject.next(false))
+    );
+
+  // Action stream for loading
+  private isLoadingSubject = new BehaviorSubject<boolean>(false);
+  isLoadingAction$ = this.isLoadingSubject.asObservable();
+
+  // Suppliers for the selected product with the loading action stream
+  selectedProductSuppliers4$ = this.selectedProduct$
+    .pipe(
+      filter(selectedProduct => Boolean(selectedProduct)),
+      tap(() => this.isLoadingSubject.next(true)),
+      tap(product => console.log('product', JSON.stringify(product))),
+      switchMap(selectedProduct =>
+        forkJoin(selectedProduct.supplierIds.map(supplierId => this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)))
+      ),
+      tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers))),
+      tap(() => this.isLoadingSubject.next(false))
     );
 
   // Suppliers for all products

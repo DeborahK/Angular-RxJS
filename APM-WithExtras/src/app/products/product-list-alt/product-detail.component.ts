@@ -32,7 +32,7 @@ export class ProductDetailComponent {
     );
 
   // Suppliers for this product
-  productSuppliers$ = this.productService.selectedProductSuppliers3$
+  productSuppliers$ = this.productService.selectedProductSuppliers$
     .pipe(
       catchError(err => {
         this.errorMessageSubject.next(err);
@@ -40,6 +40,7 @@ export class ProductDetailComponent {
       }));
 
   // Whether data is currently loading
+  // NOTE: Could also display a loading indicator icon while loading.
   isLoading$ = this.productService.isLoadingAction$;
   
   // Create a combined stream with the data used in the view
