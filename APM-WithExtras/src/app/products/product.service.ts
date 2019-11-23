@@ -310,8 +310,8 @@ export class ProductService {
   // Emits one product at a time with a delay
   productsOneByOne$ = this.products$
     .pipe(
-      mergeMap(item => item),
-      concatMap(item => of(item).pipe(delay(500))),
+      mergeMap(products => products),  // Flatten the array
+      concatMap(product => of(product).pipe(delay(500))),
       catchError(this.handleError)
     );
 
