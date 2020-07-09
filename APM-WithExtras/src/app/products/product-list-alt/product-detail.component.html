@@ -32,7 +32,7 @@
     </div>
 
     <div class="table-responsive"
-          *ngIf="!(isLoading$ | async)">
+          *ngIf="(isLoading$ | async) === false">
       <table class="table mb-0"
              *ngIf="vm.productSuppliers && vm.productSuppliers.length">
         <thead>

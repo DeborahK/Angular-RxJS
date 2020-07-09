@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { BehaviorSubject, combineLatest, EMPTY, from, merge, Subject, throwError, of, forkJoin } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, from, merge, Subject, throwError, of, forkJoin, Observable } from 'rxjs';
 import {
   catchError, filter, map, mergeMap, scan, shareReplay, tap, toArray, switchMap,
   mergeAll, max, reduce, concatMap, delay
@@ -206,7 +206,7 @@ export class ProductService {
             .pipe(
               map(suppliers => ({
                 ...product,
-                suppliers: suppliers
+                suppliers
               } as Product))
             )
         ))
@@ -335,7 +335,7 @@ export class ProductService {
   // Support methods
   // Save the product to the backend server
   // NOTE: This could be broken into three additional methods.
-  saveProduct(product: Product) {
+  saveProduct(product: Product): Observable<Product> {
     if (product.status === StatusCode.Added) {
       product.id = null;
       return this.http.post<Product>(this.productsUrl, product, { headers: this.headers })
@@ -367,7 +367,7 @@ export class ProductService {
   }
 
   // Modify the array of products
-  modifyProducts(products: Product[], product: Product) {
+  modifyProducts(products: Product[], product: Product): Product[] {
     if (product.status === StatusCode.Added) {
       // Return a new array from the array of products + new product
       return [
@@ -388,8 +388,8 @@ export class ProductService {
   /* END */
 
   constructor(private http: HttpClient,
-    private productCategoryService: ProductCategoryService,
-    private supplierService: SupplierService) {
+              private productCategoryService: ProductCategoryService,
+              private supplierService: SupplierService) {
     // To try out each of the additional examples
     // (which are not currently bound in the UI)
     // this.allProductsAndSuppliers$.subscribe(console.log);
@@ -404,7 +404,7 @@ export class ProductService {
     // this.productsOneByOne$.subscribe(console.log);
   }
 
-  addProduct(newProduct?: Product) {
+  addProduct(newProduct?: Product): void {
     newProduct = newProduct || this.fakeProduct();
     this.productInsertedSubject.next(newProduct);
 
@@ -413,14 +413,14 @@ export class ProductService {
     this.productModifiedSubject.next(newProduct);
   }
 
-  deleteProduct(selectedProduct: Product) {
+  deleteProduct(selectedProduct: Product): void {
     // Update a copy of the selected product
     const deletedProduct = { ...selectedProduct };
     deletedProduct.status = StatusCode.Deleted;
     this.productModifiedSubject.next(deletedProduct);
   }
 
-  updateProduct(selectedProduct: Product) {
+  updateProduct(selectedProduct: Product): void {
     // Update a copy of the selected product
     const updatedProduct = { ...selectedProduct };
     updatedProduct.quantityInStock += 1;
@@ -438,7 +438,7 @@ export class ProductService {
     this.refresh.next(true);
   }
 
-  private fakeProduct() {
+  private fakeProduct(): Product {
     return {
       id: 42,
       productName: 'Another One',
@@ -452,7 +452,7 @@ export class ProductService {
     };
   }
 
-  private handleError(err: any) {
+  private handleError(err: any): Observable<never> {
     // in a real world app, we may send the server to some remote logging infrastructure
     // instead of just logging it to the console
     let errorMessage: string;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { throwError, of } from 'rxjs';
+import { throwError, of, Observable } from 'rxjs';
 import { map, tap, concatMap, mergeMap, switchMap, shareReplay, catchError } from 'rxjs/operators';
 
 import { Supplier } from './supplier';
@@ -58,7 +58,7 @@ export class SupplierService {
     // this.suppliersWithSwitchMap$.subscribe(item => console.log('switchMap result', item));
   }
 
-  private handleError(err: any) {
+  private handleError(err: any): Observable<never> {
     // in a real world app, we may send the server to some remote logging infrastructure
     // instead of just logging it to the console
     let errorMessage: string;

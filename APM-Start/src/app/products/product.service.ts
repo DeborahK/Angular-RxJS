@@ -26,7 +26,7 @@ export class ProductService {
       );
   }
 
-  private fakeProduct() {
+  private fakeProduct(): Product {
     return {
       id: 42,
       productName: 'Another One',
@@ -34,12 +34,12 @@ export class ProductService {
       description: 'Our new product',
       price: 8.9,
       categoryId: 3,
-      category: 'Toolbox',
+      // category: 'Toolbox',
       quantityInStock: 30
     };
   }
 
-  private handleError(err: any) {
+  private handleError(err: any): Observable<never> {
     // in a real world app, we may send the server to some remote logging infrastructure
     // instead of just logging it to the console
     let errorMessage: string;

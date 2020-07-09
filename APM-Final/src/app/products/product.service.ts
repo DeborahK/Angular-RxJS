@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { BehaviorSubject, combineLatest, EMPTY, from, merge, Subject, throwError, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, from, merge, Subject, throwError, of, Observable } from 'rxjs';
 import { catchError, filter, map, mergeMap, scan, shareReplay, tap, toArray, switchMap } from 'rxjs/operators';
 
 import { Product } from './product';
@@ -120,7 +120,7 @@ export class ProductService {
               private productCategoryService: ProductCategoryService,
               private supplierService: SupplierService) { }
 
-  addProduct(newProduct?: Product) {
+  addProduct(newProduct?: Product): void {
     newProduct = newProduct || this.fakeProduct();
     this.productInsertedSubject.next(newProduct);
   }
@@ -130,7 +130,7 @@ export class ProductService {
     this.productSelectedSubject.next(selectedProductId);
   }
 
-  private fakeProduct() {
+  private fakeProduct(): Product {
     return {
       id: 42,
       productName: 'Another One',
@@ -143,7 +143,7 @@ export class ProductService {
     };
   }
 
-  private handleError(err: any) {
+  private handleError(err: any): Observable<never> {
     // in a real world app, we may send the server to some remote logging infrastructure
     // instead of just logging it to the console
     let errorMessage: string;

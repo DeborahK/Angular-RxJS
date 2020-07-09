@@ -12,8 +12,8 @@ import { ProductService } from '../product.service';
 export class ProductListAltComponent implements OnInit, OnDestroy {
   pageTitle = 'Products';
   errorMessage = '';
-  selectedProductId;
-  
+  selectedProductId: number;
+
   products: Product[] = [];
   sub: Subscription;
 
