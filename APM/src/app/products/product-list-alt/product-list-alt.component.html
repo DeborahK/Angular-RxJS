@@ -4,7 +4,7 @@
   </div>
 
   <div class='card-body'
-       *ngIf="products">
+       *ngIf="products$ | async as products">
     <div class='list-group'>
       <button type='button'
               class='list-group-item'

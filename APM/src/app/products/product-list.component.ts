@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { Subscription, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -10,28 +10,23 @@ import { ProductService } from './product.service';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
   categories;
 
   //products: Product[] = [];
-  products$ : Observable<Product[]>;
+  products$ : Observable<Product[]> = this.productService.products$.pipe(
+    catchError (err => {
+      this.errorMessage = err;
+      return of([]);
+    })
+
+  );
+
   sub: Subscription;
 
   constructor(private productService: ProductService) { }
-
-  ngOnInit(): void {
-    this.products$ = this.productService.getProducts()
-    .pipe(
-      catchError (err => {
-        this.errorMessage = err;
-        return of([]);
-      })
-
-    );
-  }
-
 
   onAdd(): void {
     console.log('Not yet implemented');
