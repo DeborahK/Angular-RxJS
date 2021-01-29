@@ -1,0 +1,35 @@
+<div class="card">
+  <div class="card-header">
+    {{pageTitle}}
+  </div>
+
+  <div class="card-body"
+       *ngIf="productsWithSupplier$ | async as productsWithSupplier">
+
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Code</th>
+            <th>Supplier</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody *ngFor="let product of productsWithSupplier">
+          <tr>
+            <td>{{ product.productName }}</td>
+            <td>{{ product.productCode }}</td>
+            <td>{{ product.supplier }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div class="alert alert-danger"
+     *ngIf="errorMessage$ | async as errorMessage">
+  {{ errorMessage }}
+</div>

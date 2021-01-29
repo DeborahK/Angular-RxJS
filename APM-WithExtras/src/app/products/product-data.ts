@@ -59,7 +59,7 @@ export class ProductData {
       price: 8.9,
       categoryId: 3,
       quantityInStock: 8,
-      supplierIds: [5, 6]
+      supplierIds: [5, 6, 10]
     },
     {
       id: 8,

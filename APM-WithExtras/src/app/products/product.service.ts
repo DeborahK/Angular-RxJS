@@ -7,7 +7,7 @@ import {
   mergeAll, max, reduce, concatMap, delay
 } from 'rxjs/operators';
 
-import { Product, ProductClass, StatusCode } from './product';
+import { Product, ProductClass, ProductWithSupplier, StatusCode } from './product';
 import { ProductFromAPI } from './product-data-fromAPI';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 import { Supplier, SupplierClass } from '../suppliers/supplier';
@@ -56,6 +56,51 @@ export class ProductService {
     ),
     shareReplay(1)
   );
+
+  // Merge products with their suppliers
+  // Map to the revised shape: one line per product/supplier.
+  // Be sure to specify the type to ensure after the map that it knows the correct type
+  productsWithSupplier$ = this.products$.pipe(
+    // Higher order operator to subscribe to inner observerable and flatten the result
+    // Cannot use forkJoin here because it "emits an array of values in the exact same order as the passed array"
+    // Which means since we start with products, it will only emit one row per product and not all of the generated rows.
+    mergeMap(products =>
+      // For each product, process the suppliers
+      products.map(product => this.supplierService.suppliers$.pipe(
+        // Filter to those suppliers for this product
+        // Higher order operator to flatten the result and emit each supplier
+        mergeMap(suppliers => suppliers.filter(s => product.supplierIds.includes(s.id))),
+        // For each of the product's suppliers, create a ProductWithSupplier object
+        map(supplier => ({
+          ...product,
+          supplier: supplier.name
+        }) as ProductWithSupplier),
+      ))),
+    // To flatten the result Observable<Observable<Supplier>> -> Observable<Supplier>
+    mergeMap(productWithSupplier => productWithSupplier),
+    // To put the emitted rows into an array (instead of emitting one at a time)
+    toArray(),
+    shareReplay(1)
+  );
+
+  // With categories and suppliers
+  // productsWithSupplier$ = combineLatest([
+  //   this.products$,
+  //   this.productCategoryService.productCategories$
+  // ]).pipe(
+  //   mergeMap(([products, categories]) =>
+  //     products.map(product => this.supplierService.suppliers$.pipe(
+  //       mergeMap(suppliers => suppliers.filter(s => product.supplierIds.includes(s.id))),
+  //       map(supplier => ({
+  //         ...product,
+  //         category: categories.find(c => product.categoryId === c.id).name,
+  //         supplier: supplier.name
+  //       }) as ProductWithSupplier),
+  //     ))),
+  //   mergeMap(group => group),
+  //   toArray(),
+  //   shareReplay(1)
+  // );
 
   // Action Stream for adding products to the Observable
   private productInsertedSubject = new Subject<Product>();

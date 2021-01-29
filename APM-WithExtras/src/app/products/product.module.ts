@@ -8,6 +8,7 @@ import { ProductDetailComponent } from './product-list-alt/product-detail.compon
 
 import { SharedModule } from '../shared/shared.module';
 import { ProductListAltComponent } from './product-list-alt/product-list-alt.component';
+import { ProductSupplierComponent } from './product-supplier.component';
 
 @NgModule({
   imports: [
@@ -19,6 +20,10 @@ import { ProductListAltComponent } from './product-list-alt/product-list-alt.com
         component: ProductListComponent
       },
       {
+        path: 'withSupplier',
+        component: ProductSupplierComponent
+      },
+      {
         path: ':alternate',
         component: ProductShellComponent
       }
@@ -28,7 +33,8 @@ import { ProductListAltComponent } from './product-list-alt/product-list-alt.com
     ProductListComponent,
     ProductShellComponent,
     ProductListAltComponent,
-    ProductDetailComponent
+    ProductDetailComponent,
+    ProductSupplierComponent
   ]
 })
 export class ProductModule { }

@@ -59,7 +59,7 @@ export class SupplierData {
         },
         {
             id: 10,
-            name: 'Acme General Supply',
+            name: 'Average General Supply',
             cost: 12,
             minQuantity: 12
         }

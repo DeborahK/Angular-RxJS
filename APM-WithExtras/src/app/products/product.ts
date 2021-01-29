@@ -48,3 +48,14 @@ export class ProductClass {
     return price * quantity;
   }
 }
+
+// Provided to demonstrate merging parent and
+// child data into individual rows
+export interface ProductWithSupplier {
+  id: number;
+  productName: string;
+  productCode?: string;
+  description?: string;
+  category?: string;
+  supplier?: string;
+}
