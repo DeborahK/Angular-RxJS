@@ -18,3 +18,33 @@ RxJS 是一个库，用于通过可观察的序列，处理异步和事件。
 
 **3.1 苹果流**
 
+<img src="imgs\apple_stream.png" alt="apple_stream" style="zoom:50%;" />
+
+###### observable stream
+
+<img src="imgs\apple_stream_observable_stream.png" alt="apple_stream_observable_stream" style="zoom: 33%;" />
+
+###### terms
+
+<img src="imgs\terms.png" alt="terms" style="zoom: 33%;" />
+
+##### 3.2 Observer / Subscribler
+
+观察者是我们用来观察 rxjs 内部流的接口，实现观察者接口的类是订阅者，每个观察者都会转换为订阅者
+
+<img src="imgs\subscriber.png" alt="subscriber" style="zoom:33%;" />
+
+<img src="imgs\observer.png" alt="observer" style="zoom:33%;" />
+
+##### 3.3 Observable Stream
+
+<img src="imgs\observable_stream.png" alt="observable_stream" style="zoom:33%;" />
+
+<img src="imgs\observable.png" alt="observable" style="zoom:33%;" />
+
+##### 3.4 Subscription / Starting the Observable Stream
+
+<img src="imgs\subscription.png" alt="subscription" style="zoom:33%;" />
+
+<img src="imgs\subscription_2.png" alt="subscription_2" style="zoom:33%;" />
+
