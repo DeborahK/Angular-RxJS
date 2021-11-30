@@ -42,9 +42,27 @@ RxJS 是一个库，用于通过可观察的序列，处理异步和事件。
 
 <img src="imgs\observable.png" alt="observable" style="zoom:33%;" />
 
-##### 3.4 Subscription / Starting the Observable Stream
+##### 3.4 Starting the Observable Stream / Subscription
 
 <img src="imgs\subscription.png" alt="subscription" style="zoom:33%;" />
 
 <img src="imgs\subscription_2.png" alt="subscription_2" style="zoom:33%;" />
+
+##### 3.5 Stopping the Observable Stream
+
+<img src="imgs\stop_observable_stream.png" alt="stop_observable_stream" style="zoom:33%;" />
+
+<img src="imgs\unsubscribe.png" alt="unsubscribe" style="zoom:33%;" />
+
+##### 3.6 Creation Functions
+
+Creating an Observable, 可以使用 observable 构造函数 new 一个，但更推荐用 ng 内置的静态函数，如 of、from
+
+<img src="imgs\creation_functions.png" alt="creation_functions" style="zoom:33%;" />
+
+of 函数将每一个参数都发到 stream 中，from 将数据结构中的每个元素发到 stream 中
+
+<img src="imgs\of_from.png" alt="of_from" style="zoom:33%;" />
+
+<img src="imgs\fromevent_interval.png" alt="fromevent_interval" style="zoom:33%;" />
 
