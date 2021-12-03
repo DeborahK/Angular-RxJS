@@ -34,7 +34,9 @@ RxJS 是一个库，用于通过可观察的序列，处理异步和事件。
 
 <img src="imgs\subscriber.png" alt="subscriber" style="zoom:33%;" />
 
-<img src="imgs\observer.png" alt="observer" style="zoom:33%;" />
+
+
+这三个方法是可选的<img src="imgs\observer.png" alt="observer" style="zoom:33%;" />
 
 ##### 3.3 Observable Stream
 
@@ -65,4 +67,40 @@ of 函数将每一个参数都发到 stream 中，from 将数据结构中的每�
 <img src="imgs\of_from.png" alt="of_from" style="zoom:33%;" />
 
 <img src="imgs\fromevent_interval.png" alt="fromevent_interval" style="zoom:33%;" />
+
+##### 3.7 Creation Functions Demo
+
+creation functions 会自动调用 complete 方法，所以不需要 unsubscribe()
+
+```typescript
+import { from, of } from 'rxjs';
+
+ngOnInit() {
+    of(2, 6, 8).subscribe(console.log); // 2 6 8
+
+    from([10, 5, 8]).subscribe(
+      (item) => console.log(`resulting item...${item}`),
+      (error) => console.log(`some error ${error}`),
+      () => console.log('complete!!!')
+    ); // resulting item...10  resulting item...5  resulting item...8  complete!!!
+ }
+```
+
+##### 3.8 Summary
+
+<img src="imgs\terms_conclusion.png" alt="terms_conclusion" style="zoom:33%;" />
+
+<img src="imgs\creating_an_observable.png" alt="creating_an_observable" style="zoom:33%;" />
+
+<img src="imgs\starting_an_observable.png" alt="starting_an_observable" style="zoom:33%;" />
+
+<img src="imgs\stoping_an_observable.png" alt="stoping_an_observable" style="zoom:33%;" />
+
+##### 4.2 RxJS Operators Overview
+
+使用 Observable 的 pipe() 方法 按顺序应用 Operators 运算符，然后再把值传个 subscriber
+
+<img src="imgs\operators_overview.png" alt="operators_overview" style="zoom:33%;" />
+
+<img src="imgs\operators_theroy.png" alt="operators_theroy" style="zoom:33%;" />
 
