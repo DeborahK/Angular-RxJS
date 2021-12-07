@@ -98,9 +98,10 @@ ngOnInit() {
 
 ##### 4.2 RxJS Operators Overview
 
-使用 Observable 的 pipe() 方法 按顺序应用 Operators 运算符，然后再把值传个 subscriber
+使用 Observable 的 pipe() 方法 **依序**应用 Operators 运算符，然后再把值传给 subscriber
 
 <img src="imgs\operators_overview.png" alt="operators_overview" style="zoom:33%;" />
 
 <img src="imgs\operators_theroy.png" alt="operators_theroy" style="zoom:33%;" />
 
+<img src="imgs\map_operartor.png" alt="map_operartor" style="zoom:33%;" />
