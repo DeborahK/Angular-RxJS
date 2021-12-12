@@ -102,6 +102,9 @@ ngOnInit() {
 
 <img src="imgs\operators_overview.png" alt="operators_overview" style="zoom:33%;" />
 
+##### 4.3 map
+
 <img src="imgs\operators_theroy.png" alt="operators_theroy" style="zoom:33%;" />
 
 <img src="imgs\map_operartor.png" alt="map_operartor" style="zoom:33%;" />
+
