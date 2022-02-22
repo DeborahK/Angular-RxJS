@@ -39,11 +39,36 @@
         </tbody>
       </table>
     </div>
-
   </div>
 </div>
 
-<div class="alert alert-danger"
-     *ngIf="errorMessage$ | async as errorMessage">
-  {{ errorMessage }}
-</div>
+<div class="card">
+  <div class="card-header">
+    Products one at a time
+  </div>
+
+  <div class="card-body"
+       *ngIf="vm$ | async as vm">
+    <div class="container">
+      <div class="table-responsive">
+        <table class="table mb-0"
+               *ngIf="product$ | async as product">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <td>{{ product.productName }}</td>
+            <td>{{ product.productCode }}</td>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-danger"
+       *ngIf="errorMessage$ | async as errorMessage">
+    {{ errorMessage }}
+  </div>

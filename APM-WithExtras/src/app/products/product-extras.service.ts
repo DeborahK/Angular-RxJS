@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { BehaviorSubject, catchError, combineLatest, EMPTY, map, max, merge, mergeMap, Observable, of, reduce, scan, shareReplay, Subject, switchMap, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, concatMap, delay, EMPTY, map, max, merge, mergeMap, Observable, of, reduce, scan, shareReplay, Subject, switchMap, tap, throwError } from 'rxjs';
 
 import { Product, ProductClass, ProductWithSupplier } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
@@ -63,20 +63,6 @@ export class ProductExtrasService {
     shareReplay(1)
   );
 
-  private productSelectedSubject = new BehaviorSubject<number>(0);
-  productSelectedAction$ = this.productSelectedSubject.asObservable();
-
-  selectedProduct$ = combineLatest([
-    this.productsWithCategory$,
-    this.productSelectedAction$
-  ]).pipe(
-    map(([products, selectedProductId]) =>
-      products.find(product => product.id === selectedProductId)
-    ),
-    tap(product => console.log('selectedProduct', product)),
-    shareReplay(1)
-  );
-
   private productInsertedSubject = new Subject<Product>();
   productInsertedAction$ = this.productInsertedSubject.asObservable();
 
@@ -131,6 +117,15 @@ export class ProductExtrasService {
         return productInstance;
       }))
   );
+  //#endregion
+
+  //#region Emit one product at a time with a delay
+  productsOneByOne$ = this.products$
+    .pipe(
+      mergeMap(products => products),  // Flatten the array
+      concatMap(product => of(product).pipe(delay(1000))),
+      catchError(this.handleError)
+    );
   //#endregion
 
   //#region Merge products with their suppliers: one line per product/supplier.
@@ -197,9 +192,9 @@ export class ProductExtrasService {
   //#endregion
 
   constructor(private http: HttpClient,
-    private productService: ProductService,
-    private productCategoryService: ProductCategoryService,
-    private supplierService: SupplierService) {
+              private productService: ProductService,
+              private productCategoryService: ProductCategoryService,
+              private supplierService: SupplierService) {
     // this.productsClassInstance$.subscribe(data => console.table(data));
     // this.productsClassInstanceMultipleLevels$.subscribe(data => console.log('Class Instances', JSON.stringify(data)));
     // this.productsFromAPI$.subscribe(data => console.table(data));
@@ -210,10 +205,6 @@ export class ProductExtrasService {
   addProduct(newProduct?: Product) {
     newProduct = newProduct || this.fakeProduct();
     this.productInsertedSubject.next(newProduct);
-  }
-
-  selectedProductChanged(selectedProductId: number): void {
-    this.productSelectedSubject.next(selectedProductId);
   }
 
   private fakeProduct(): Product {

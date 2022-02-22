@@ -49,6 +49,9 @@ export class ProductListExtrasComponent {
         ({ products, categories }))
     );
 
+  // Products emitted one at a time.
+  product$ = this.productExtrasService.productsOneByOne$;
+
   constructor(private productExtrasService: ProductExtrasService,
     private productCategoryService: ProductCategoryService
     ) { }

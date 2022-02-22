@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
-import {  catchError, combineLatest, concatMap,   map, merge,  Observable, of, scan, shareReplay, Subject, tap, throwError } from 'rxjs';
+import { catchError, combineLatest, concatMap, map, merge, Observable, of, scan, shareReplay, Subject, tap, throwError } from 'rxjs';
 
 import { Product } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 import { Action } from '../shared/edit-action';
 
+/*
+  Demonstrates create, update, and delete operations
+*/
 @Injectable({
   providedIn: 'root'
 })
@@ -63,7 +66,7 @@ export class ProductEditService {
     if (operation.action === 'add') {
       // Assigning the id to null is required for the inmemory Web API
       // Return the product from the server
-      return this.http.post<Product>(this.productsUrl, {...product, id: null}, { headers: this.headers })
+      return this.http.post<Product>(this.productsUrl, { ...product, id: null }, { headers: this.headers })
         .pipe(
           map(product => ({ item: product, action: operation.action })),
           catchError(this.handleError)
@@ -109,7 +112,7 @@ export class ProductEditService {
   }
 
   constructor(private http: HttpClient,
-    private productCategoryService: ProductCategoryService) {
+              private productCategoryService: ProductCategoryService) {
   }
 
   addProduct(newProduct?: Product): void {
