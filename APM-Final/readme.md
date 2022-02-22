@@ -3,11 +3,12 @@
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.2.
 
 Added packages:
-npm install bootstrap
-npm install angular-in-memory-web-api
-ng add @angular-eslint/schematics
-npm install eslint-plugin-rxjs --save-dev
-npm install eslint-plugin-rxjs-angular --save-dev
+- npm install bootstrap
+- npm install angular-in-memory-web-api
+- ng add @angular-eslint/schematics
+- npm install eslint-plugin-rxjs --save-dev
+- npm install eslint-plugin-rxjs-angular --save-dev
+
 (The above also required changes to .eslintrc.json)
 
 ## Development server
