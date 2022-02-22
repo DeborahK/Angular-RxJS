@@ -1,0 +1,38 @@
+<div class="card border-secondary"
+     *ngIf='(cartItems$ | async)?.length; else noItems'>
+
+  <div class='card-header text-secondary fw-bold'>
+    <div class="row">
+      <div class="col-md-12">Cart Total</div>
+    </div>
+  </div>
+
+  <div class='card-body'>
+    <div class="row">
+      <div class="col-md-4">Subtotal:</div>
+      <div class="col-md-8  text-end">{{subTotal$ | async | currency}}</div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">Delivery:</div>
+      <div class="col-md-8 text-end"
+           *ngIf='deliveryFee$ | async as deliveryFee'>{{deliveryFee | currency}}</div>
+      <div class="col-md-8"
+           style='text-align:right;color:red'
+           *ngIf='!(deliveryFee$ | async)'>Free</div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">Estimated Tax:</div>
+      <div class="col-md-8  text-end">{{tax$ | async | currency}}</div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4"><b>Total:</b></div>
+      <div class="col-md-8 text-end"><b>{{totalPrice$ | async | currency}}</b></div>
+    </div>
+  </div>
+</div>
+
+<ng-template #noItems>
+  <b>No items in cart</b>
+</ng-template>

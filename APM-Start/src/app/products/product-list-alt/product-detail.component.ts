@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Supplier } from 'src/app/suppliers/supplier';
+import { Product } from '../product';
 
 import { ProductService } from '../product.service';
 
@@ -9,7 +11,8 @@ import { ProductService } from '../product.service';
 export class ProductDetailComponent {
   pageTitle = 'Product Detail';
   errorMessage = '';
-  product;
+  product: Product | null = null;
+  productSuppliers: Supplier[] | null = null;
 
   constructor(private productService: ProductService) { }
 

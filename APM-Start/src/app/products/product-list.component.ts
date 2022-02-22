@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { Subscription } from 'rxjs';
+import { ProductCategory } from '../product-categories/product-category';
 
 import { Product } from './product';
 import { ProductService } from './product.service';
@@ -12,19 +13,19 @@ import { ProductService } from './product.service';
 export class ProductListComponent implements OnInit, OnDestroy {
   pageTitle = 'Product List';
   errorMessage = '';
-  categories;
+  categories: ProductCategory[] = [];
 
   products: Product[] = [];
-  sub: Subscription;
+  sub!: Subscription;
 
   constructor(private productService: ProductService) { }
 
   ngOnInit(): void {
     this.sub = this.productService.getProducts()
-      .subscribe(
-        products => this.products = products,
-        error => this.errorMessage = error
-      );
+      .subscribe({
+        next: products => this.products = products,
+        error: err => this.errorMessage = err
+      });
   }
 
   ngOnDestroy(): void {

@@ -12,3 +12,7 @@ div.card {
 .table {
   margin-top: 10px
 }
+
+a {
+  text-decoration: none; 
+}

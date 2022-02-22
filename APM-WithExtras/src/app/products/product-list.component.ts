@@ -1,11 +1,8 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { BehaviorSubject, catchError, combineLatest, EMPTY, map, Subject } from 'rxjs';
 
-import { combineLatest, BehaviorSubject, EMPTY, Subject } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-
-import { ProductService } from './product.service';
 import { ProductCategoryService } from '../product-categories/product-category.service';
-import { Product } from './product';
+import { ProductService } from './product.service';
 
 @Component({
   templateUrl: './product-list.component.html',
@@ -17,14 +14,11 @@ export class ProductListComponent {
   private errorMessageSubject = new Subject<string>();
   errorMessage$ = this.errorMessageSubject.asObservable();
 
-  // Action stream
   private categorySelectedSubject = new BehaviorSubject<number>(0);
   categorySelectedAction$ = this.categorySelectedSubject.asObservable();
 
-  // Merge Data stream with Action stream
-  // To filter to the selected category
   products$ = combineLatest([
-    this.productService.productsWithCRUD$,
+    this.productService.productsWithAdd$,
     this.categorySelectedAction$
   ])
     .pipe(
@@ -38,7 +32,6 @@ export class ProductListComponent {
       })
     );
 
-  // Categories for drop down list
   categories$ = this.productCategoryService.productCategories$
     .pipe(
       catchError(err => {
@@ -47,7 +40,6 @@ export class ProductListComponent {
       })
     );
 
-  // Combine the streams for the view
   vm$ = combineLatest([
     this.products$,
     this.categories$
@@ -58,26 +50,13 @@ export class ProductListComponent {
     );
 
   constructor(private productService: ProductService,
-              private productCategoryService: ProductCategoryService) { }
+    private productCategoryService: ProductCategoryService) { }
 
   onAdd(): void {
     this.productService.addProduct();
   }
 
-  onDelete(product: Product): void {
-    this.productService.deleteProduct(product);
-  }
-
-  onRefresh(): void {
-    this.productService.refreshData();
-  }
-
   onSelected(categoryId: string): void {
     this.categorySelectedSubject.next(+categoryId);
   }
-
-  onUpdate(product: Product): void {
-    this.productService.updateProduct(product);
-  }
-
 }

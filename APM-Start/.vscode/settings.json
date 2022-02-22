@@ -1,4 +1,9 @@
 {
   "files.autoSave": "afterDelay",
-  "html.format.wrapAttributes": "force-aligned"
+  "html.format.wrapAttributes": "force-aligned",
+  "html.hover.references": false,
+  "html.hover.documentation": false,
+  "editor.glyphMargin": false,
+  // Use 3 when recording demos
+  //"window.zoomLevel": 3,
 }

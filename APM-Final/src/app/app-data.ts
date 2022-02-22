@@ -9,7 +9,7 @@ import { Supplier } from './suppliers/supplier';
 
 export class AppData implements InMemoryDbService {
 
-  createDb(): { products: Product[], productCategories: ProductCategory[], suppliers: Supplier[]} {
+  createDb(): { products: Product[], productCategories: ProductCategory[], suppliers: Supplier[] } {
     const products = ProductData.products;
     const productCategories = ProductCategoryData.categories;
     const suppliers = SupplierData.suppliers;

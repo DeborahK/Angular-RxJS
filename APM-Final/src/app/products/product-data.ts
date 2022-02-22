@@ -52,6 +52,15 @@ export class ProductData {
       categoryId: 5,
       quantityInStock: 12,
       supplierIds: [9, 10]
+    },
+    {
+      id: 13,
+      productName: 'Chatty Cathy (no suppliers)',
+      productCode: 'GMG-0001',
+      description: 'Doll from the 1960s',
+      price: 675.00,
+      categoryId: 5,
+      quantityInStock: 0
     }
   ];
 }

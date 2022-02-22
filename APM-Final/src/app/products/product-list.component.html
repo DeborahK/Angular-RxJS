@@ -9,7 +9,7 @@
       <div class="row justify-content-between">
         <div class="col-3">
           <select class="form-control"
-                  (change)="onSelected($event.target.value)">
+                  (change)="onSelected($any($event.target).value)">
             <option value="0">- Display All -</option>
             <option *ngFor="let category of vm.categories"
                     [value]="category.id">{{ category.name }}</option>
@@ -35,8 +35,8 @@
             <th>In Stock</th>
           </tr>
         </thead>
-        <tbody *ngFor="let product of vm.products">
-          <tr>
+        <tbody>
+          <tr *ngFor="let product of vm.products">
             <td>{{ product.productName }}</td>
             <td>{{ product.productCode }}</td>
             <td>{{ product.category }}</td>

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { CartShellComponent } from './cart/cart-shell/cart-shell.component';
 
 import { WelcomeComponent } from './home/welcome.component';
 import { PageNotFoundComponent } from './page-not-found.component';
@@ -13,6 +14,7 @@ import { PageNotFoundComponent } from './page-not-found.component';
         loadChildren: () =>
           import('./products/product.module').then(m => m.ProductModule)
       },
+      { path: 'cart', component: CartShellComponent},
       { path: '', redirectTo: 'welcome', pathMatch: 'full' },
       { path: '**', component: PageNotFoundComponent }
     ])

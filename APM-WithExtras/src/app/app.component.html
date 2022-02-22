@@ -14,13 +14,31 @@
     </li>
     <li class="nav-item">
       <a class="nav-link"
+         [routerLink]="['/products/edit']"
+         routerLinkActive="active">Products (With Edit)</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link"
+         [routerLink]="['/products/refresh']"
+         routerLinkActive="active">Products (With Refresh)</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link"
+         [routerLink]="['/products/extras']"
+         routerLinkActive="active">Products (With Extras)</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link"
          [routerLink]="['/products/alternate']"
          routerLinkActive="active">Product List (Alternate UI)</a>
     </li>
     <li class="nav-item">
       <a class="nav-link"
-         [routerLink]="['/products/withSupplier']"
-         routerLinkActive="active">Product/Supplier List</a>
+         [routerLink]="['/cart']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact : true}">Cart
+        <span class="badge bg-primary">{{cartCount$ | async}}</span>
+      </a>
     </li>
   </ul>
 </nav>

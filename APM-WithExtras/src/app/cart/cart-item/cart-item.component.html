@@ -1,0 +1,46 @@
+<div class="card border-primary"
+     *ngIf='item$ | async as item'>
+
+  <div class='card-header text-primary'>
+    <div class="row">
+      <div class="col-md-10  fw-bold">{{item.product.productName}}</div>
+      <div class="col-md-2 text-end">
+        <button type="button"
+                class="btn-close"
+                aria-label="Close"
+                (click)="onRemove()"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class='card-body'>
+    <div class="row">
+      <div class="col-md-4">Price:</div>
+      <div class="col-md-8">{{item.product.price | currency}}</div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">Category:</div>
+      <div class="col-md-8">{{item.product.category}}</div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">Quantity:</div>
+      <div class="col-md-8">
+        <select class="form-select"
+                aria-label="Quantity list"
+                style="margin-bottom: 10px;"
+                [ngModel]="item.quantity"
+                (change)="onQuantitySelected($any($event.target).value)">
+          <option disabled
+                  value="">--Select a quantity--</option>
+          <option *ngFor="let q of qtyArr">{{ q }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">Cost:</div>
+      <div class="col-md-8">{{exPrice$ | async | currency}}</div>
+    </div>
+  </div>
+</div>

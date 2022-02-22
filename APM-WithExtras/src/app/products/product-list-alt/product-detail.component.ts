@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-
-import { combineLatest, EMPTY, Subject } from 'rxjs';
-import { catchError, map, filter, tap } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { catchError, combineLatest, EMPTY, filter, map, Subject } from 'rxjs';
 
 import { ProductService } from '../product.service';
+import { CartService } from '../../cart/cart.service';
 import { Product } from '../product';
 
 @Component({
@@ -15,7 +14,6 @@ export class ProductDetailComponent {
   private errorMessageSubject = new Subject<string>();
   errorMessage$ = this.errorMessageSubject.asObservable();
 
-  // Product to display
   product$ = this.productService.selectedProduct$
     .pipe(
       catchError(err => {
@@ -24,14 +22,11 @@ export class ProductDetailComponent {
       })
     );
 
-  // Set the page title
   pageTitle$ = this.product$
     .pipe(
-      map((p: Product) =>
-        p ? `Product Detail for: ${p.productName}` : null)
+      map(p => p ? `Product Detail for: ${p.productName}` : null)
     );
 
-  // Suppliers for this product
   productSuppliers$ = this.productService.selectedProductSuppliers$
     .pipe(
       catchError(err => {
@@ -39,12 +34,6 @@ export class ProductDetailComponent {
         return EMPTY;
       }));
 
-  // Whether data is currently loading
-  // NOTE: Could also display a loading indicator icon while loading.
-  isLoading$ = this.productService.isLoadingAction$;
-
-  // Create a combined stream with the data used in the view
-  // Use filter to skip if the product is null
   vm$ = combineLatest([
     this.product$,
     this.productSuppliers$,
@@ -56,6 +45,10 @@ export class ProductDetailComponent {
         ({ product, productSuppliers, pageTitle }))
     );
 
-  constructor(private productService: ProductService) { }
+  constructor(private productService: ProductService,
+              private cartService: CartService) { }
 
+  addToCart(product: Product) {
+    this.cartService.addToCart(product);
+  }
 }

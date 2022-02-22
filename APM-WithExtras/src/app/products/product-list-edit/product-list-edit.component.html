@@ -1,0 +1,67 @@
+<div class="card">
+  <div class="card-header">
+    {{pageTitle}}
+  </div>
+
+  <div class="card-body"
+       *ngIf="vm$ | async as vm">
+    <div class="container">
+      <div class="row justify-content-between">
+        <div class="col-3">
+          <select class="form-control"
+                  (change)="onSelected($any($event.target).value)">
+            <option value="0">- Display All -</option>
+            <option *ngFor="let category of vm.categories"
+                    [value]="category.id">{{ category.name }}</option>
+          </select>
+        </div>
+        <div class="col-2">
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="onAdd()">Add Product
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table mb-0"
+             *ngIf="vm.products">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Code</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>In Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of vm.products">
+            <td>{{ product.productName }}</td>
+            <td>{{ product.productCode }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.price | currency:"USD":"symbol":"1.2-2" }}</td>
+            <td>{{ product.quantityInStock }}</td>
+            <td>
+              <button type="button"
+                      class="btn btn-outline-primary mx-2"
+                      (click)="onUpdate(product)">Update
+              </button>
+              <button type="button"
+                      class="btn btn-outline-warning"
+                      (click)="onDelete(product)">Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div class="alert alert-danger"
+     *ngIf="errorMessage$ | async as errorMessage">
+  {{ errorMessage }}
+</div>

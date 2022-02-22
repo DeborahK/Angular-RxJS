@@ -1,10 +1,7 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-
-import { combineLatest, Subject, EMPTY } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { catchError, combineLatest, EMPTY, map, Subject } from 'rxjs';
 
 import { ProductService } from '../product.service';
-import { Product } from '../product';
 
 @Component({
   selector: 'pm-product-list',
@@ -16,26 +13,22 @@ export class ProductListAltComponent {
   private errorMessageSubject = new Subject<string>();
   errorMessage$ = this.errorMessageSubject.asObservable();
 
-  // Products with their categories
-  // Using productsWithAdd here to pick up
-  // any newly added products
-  products$ = this.productService.productsWithAdd$
+  products$ = this.productService.productsWithCategory$
     .pipe(
       catchError(err => {
         this.errorMessageSubject.next(err);
         return EMPTY;
-      }));
+      })
+    );
 
-  // Selected product to highlight the entry
   selectedProduct$ = this.productService.selectedProduct$;
 
-  // Combine all streams for the view
   vm$ = combineLatest([
     this.products$,
     this.selectedProduct$
   ])
     .pipe(
-      map(([products, product]: [Product[], Product]) =>
+      map(([products, product]) =>
         ({ products, productId: product ? product.id : 0 }))
     );
 

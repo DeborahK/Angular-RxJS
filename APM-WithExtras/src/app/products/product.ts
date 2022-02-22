@@ -1,4 +1,4 @@
-import { Supplier } from '../suppliers/supplier';
+import { Supplier, SupplierClass } from "../suppliers/supplier";
 
 /* Defines the product entity */
 export interface Product {
@@ -12,27 +12,17 @@ export interface Product {
   quantityInStock?: number;
   searchKey?: string[];
   supplierIds?: number[];
-  suppliers?: Supplier[]; // To demonstrate a nested object graph
-  status?: StatusCode;    // Identifies current status of the item
 }
 
-export enum StatusCode {
-  Unchanged,
-  Added,
-  Deleted,
-  Updated
-}
-
-export interface ProductResolved {
-  product: Product;
-  error?: any;
-}
+//
+// Extras not included in the course
+//
 
 // Provided to demonstrate how to map to
 // class instances.
 export class ProductClass {
-  id: number;
-  productName: string;
+  id: number = 0;
+  productName: string = '';
   productCode?: string;
   description?: string;
   price?: number;
@@ -40,7 +30,8 @@ export class ProductClass {
   quantityInStock?: number;
   searchKey?: string[];
   inventoryValuation?: number;
-  suppliers?: Supplier[];
+  supplierIds?: number[];
+  suppliers?: SupplierClass[];
 
   calculateValuation(): number {
     const price = this.price ? this.price : 0;
@@ -56,6 +47,7 @@ export interface ProductWithSupplier {
   productName: string;
   productCode?: string;
   description?: string;
+  categoryId?: number;
   category?: string;
   supplier?: string;
 }

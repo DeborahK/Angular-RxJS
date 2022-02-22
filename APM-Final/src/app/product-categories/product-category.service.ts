@@ -1,9 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { throwError, Observable } from 'rxjs';
-import { catchError, tap, shareReplay } from 'rxjs/operators';
-
+import { throwError, Observable, tap, catchError, shareReplay } from 'rxjs';
 import { ProductCategory } from './product-category';
 
 @Injectable({
@@ -12,7 +10,6 @@ import { ProductCategory } from './product-category';
 export class ProductCategoryService {
   private productCategoriesUrl = 'api/productCategories';
 
-  // All product categories
   productCategories$ = this.http.get<ProductCategory[]>(this.productCategoriesUrl)
     .pipe(
       tap(data => console.log('categories', JSON.stringify(data))),
@@ -22,7 +19,7 @@ export class ProductCategoryService {
 
   constructor(private http: HttpClient) { }
 
-  private handleError(err: any): Observable<never> {
+  private handleError(err: HttpErrorResponse): Observable<never> {
     // in a real world app, we may send the server to some remote logging infrastructure
     // instead of just logging it to the console
     let errorMessage: string;
@@ -32,9 +29,9 @@ export class ProductCategoryService {
     } else {
       // The backend returned an unsuccessful response code.
       // The response body may contain clues as to what went wrong,
-      errorMessage = `Backend returned code ${err.status}: ${err.body.error}`;
+      errorMessage = `Backend returned code ${err.status}: ${err.message}`;
     }
     console.error(err);
-    return throwError(errorMessage);
+    return throwError(() => errorMessage);
   }
 }

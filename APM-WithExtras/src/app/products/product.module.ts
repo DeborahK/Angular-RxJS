@@ -5,10 +5,12 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ProductListComponent } from './product-list.component';
 import { ProductShellComponent } from './product-list-alt/product-shell.component';
 import { ProductDetailComponent } from './product-list-alt/product-detail.component';
+import { ProductListAltComponent } from './product-list-alt/product-list-alt.component';
+import { ProductListRefreshComponent } from './product-list-refresh/product-list-refresh.component';
 
 import { SharedModule } from '../shared/shared.module';
-import { ProductListAltComponent } from './product-list-alt/product-list-alt.component';
-import { ProductSupplierComponent } from './product-supplier.component';
+import { ProductListEditComponent } from './product-list-edit/product-list-edit.component';
+import { ProductListExtrasComponent } from './product-list-extras/product-list-extras.component';
 
 @NgModule({
   imports: [
@@ -20,12 +22,20 @@ import { ProductSupplierComponent } from './product-supplier.component';
         component: ProductListComponent
       },
       {
-        path: 'withSupplier',
-        component: ProductSupplierComponent
+        path: 'alternate',
+        component: ProductShellComponent
       },
       {
-        path: ':alternate',
-        component: ProductShellComponent
+        path: 'edit',
+        component: ProductListEditComponent
+      },
+      {
+        path: 'extras',
+        component: ProductListExtrasComponent
+      },
+      {
+        path: 'refresh',
+        component: ProductListRefreshComponent
       }
     ])
   ],
@@ -34,7 +44,9 @@ import { ProductSupplierComponent } from './product-supplier.component';
     ProductShellComponent,
     ProductListAltComponent,
     ProductDetailComponent,
-    ProductSupplierComponent
+    ProductListEditComponent,
+    ProductListExtrasComponent,
+    ProductListRefreshComponent
   ]
 })
 export class ProductModule { }

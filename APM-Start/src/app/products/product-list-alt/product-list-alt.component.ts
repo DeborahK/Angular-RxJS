@@ -12,18 +12,18 @@ import { ProductService } from '../product.service';
 export class ProductListAltComponent implements OnInit, OnDestroy {
   pageTitle = 'Products';
   errorMessage = '';
-  selectedProductId: number;
+  selectedProductId = 0;
 
   products: Product[] = [];
-  sub: Subscription;
+  sub!: Subscription;
 
   constructor(private productService: ProductService) { }
 
   ngOnInit(): void {
-    this.sub = this.productService.getProducts().subscribe(
-      products => this.products = products,
-      error => this.errorMessage = error
-    );
+    this.sub = this.productService.getProducts().subscribe({
+      next: products => this.products = products,
+      error: err => this.errorMessage = err
+    });
   }
 
   ngOnDestroy(): void {
