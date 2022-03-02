@@ -10,7 +10,7 @@
           <select class="form-control"
                   (change)="onSelected($any($event.target).value)">
             <option value="0">- Display All -</option>
-            <option *ngFor="let category of categories"
+            <option *ngFor="let category of categories$ | async "
                     [value]="category.id">{{ category.name }}</option>
           </select>
         </div>

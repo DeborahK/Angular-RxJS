@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { catchError, pipe, map, Observable, of, EMPTY, filter } from 'rxjs';
 
 import { ProductCategory } from '../product-categories/product-category';
+import { ProductCategoryService } from "../product-categories/product-category.service";
 
 import { Product } from './product';
 import { ProductService } from './product.service';
@@ -14,7 +15,7 @@ import { ProductService } from './product.service';
 export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
-  categories: ProductCategory[] = [];
+  // categories: ProductCategory[] = [];
   selectedCategoryId = 1;
 
   products$ = this.productService.productWithCategory$.pipe(
@@ -26,18 +27,27 @@ export class ProductListComponent {
     })
   );
 
+  categories$
+ = this.productCategoryService.productCategory$.pipe(
+   catchError(error => {
+     this.errorMessage = error;
+     return EMPTY
+   })
+ )
   productsSimpleFilter$ = this.productService.productWithCategory$.pipe(
     // filter(items  => items.categoryId === this.selectedCategoryId) <--- this wont work
     map(products => products.filter(product => this.selectedCategoryId? product.categoryId === this.selectedCategoryId: true))
   )
 
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductService, private productCategoryService: ProductCategoryService) {}
 
   onAdd(): void {
     console.log('Not yet implemented');
   }
 
   onSelected(categoryId: string): void {
-    console.log('Not yet implemented');
+    // console.log('Not yet implemented');
+    this.selectedCategoryId = +categoryId
+
   }
 }
