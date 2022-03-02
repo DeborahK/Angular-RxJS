@@ -4,6 +4,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, map, Observable, tap, throwError } from 'rxjs';
 
 import { Product } from './product';
+import { ProductCategoryService } from "../product-categories/product-category.service";
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,7 @@ export class ProductService {
     catchError(this.handleError)
   );
   
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private productCategoryService: ProductCategoryService) { }
 
 
 
