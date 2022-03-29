@@ -1,6 +1,7 @@
 <div class="card"
-     *ngIf="product">
-  <div class="card-header">
+     *ngIf="product$ | async as product">
+  <div class="card-header"
+        *ngIf="pageTitle$ | async as pageTitle">
     {{ pageTitle }}
   </div>
 
@@ -31,7 +32,7 @@
     </div>
 
     <div class="table-responsive"
-          *ngIf="productSuppliers">
+          *ngIf="productSuppliers$ | async as productSuppliers">
       <table class="table mb-0"
              *ngIf="productSuppliers.length; else noSuppliers">
         <thead>
@@ -59,6 +60,6 @@
 </div>
 
 <div class="alert alert-danger"
-     *ngIf="errorMessage">
+     *ngIf="errorMessage$ | async as errorMessage">
   {{ errorMessage }}
 </div>

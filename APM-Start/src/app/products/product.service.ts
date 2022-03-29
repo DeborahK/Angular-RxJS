@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { catchError, combineLatest, map, Observable, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, filter, forkJoin, map, merge, Observable, of, retry, scan, shareReplay, Subject, switchMap, tap, throwError } from 'rxjs';
 
 import { Product } from './product';
 import { ProductCategoryService } from '../product-categories/product-category.service';
+import { SupplierService } from '../suppliers/supplier.service';
+import { Supplier } from '../suppliers/supplier';
 
 @Injectable({
   providedIn: 'root'
@@ -30,12 +32,73 @@ export class ProductService {
         category: categories.find(c => product.categoryId === c.id)?.name,
         searchKey: [product.productName]
       } as Product))
-    )
+    ),
+    shareReplay(1)
+  );
 
+  private productSelectedSubject = new BehaviorSubject<number>(0);
+  productSelectedAction$ = this.productSelectedSubject.asObservable();
+
+  selectedProducts$ = combineLatest([
+    this.productsWithCategory$,
+    this.productSelectedAction$
+  ]).pipe(
+    map(([products, selectedProductId]) =>
+    products.find(product => product.id === selectedProductId)
+  ),
+  tap(product => console.log('SelectedProduct', product)),
+  shareReplay(1)
+  );
+
+  //Get it all approach:
+  // selectedProductSuppliers$ = combineLatest([
+  //   this.selectedProducts$,
+  //   this.supplierService.suppliers$
+  // ])
+  //   .pipe(
+  //     map(([selectedProduct, suppliers]) =>
+  //     suppliers.filter(supplier => selectedProduct?.supplierIds?.includes(supplier.id))
+  //     )
+  //   );
+  //Just in time approach:
+  selectedProductSuppliers$ = this.selectedProducts$
+     .pipe(
+       filter(product => Boolean(product)),
+       switchMap(selectedProduct => {
+         if (selectedProduct?.supplierIds) {
+         return forkJoin(selectedProduct.supplierIds.map(supplierId =>
+           this.http.get<Supplier>(`${this.suppliersUrl}/${supplierId}`)))
+       }else {
+        return of([]);
+       }
+     }),
+       tap(suppliers => console.log('product suppliers', JSON.stringify(suppliers)))
+     );
+
+  private productInsertedSubject = new Subject<Product>();
+  productInsertedSubject$ = this.productInsertedSubject.asObservable();
+
+  productsWithAdd$ = merge(
+    this.productsWithCategory$,
+    this.productInsertedSubject$
+  ).pipe(
+    scan((acc, value) =>
+    (value instanceof Array) ? [...value] : [...acc, value], [] as Product[])
   )
 
+  addProduct(newProduct?: Product){
+    newProduct = newProduct || this.fakeProduct();
+    this.productInsertedSubject.next(newProduct);
+
+  }
+
   constructor(private http: HttpClient,
-              private productCategoryService: ProductCategoryService) { }
+              private productCategoryService: ProductCategoryService,
+              private supplierService: SupplierService) { }
+
+  selectedProductChanged(selectedProductId: number): void {
+    this.productSelectedSubject.next(selectedProductId);
+  }
 
   private fakeProduct(): Product {
     return {
@@ -45,7 +108,7 @@ export class ProductService {
       description: 'Our new product',
       price: 8.9,
       categoryId: 3,
-      // category: 'Toolbox',
+      category: 'Toolbox',
       quantityInStock: 30
     };
   }
