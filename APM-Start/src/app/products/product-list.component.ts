@@ -1,5 +1,6 @@
+import { EmitterVisitorContext } from '@angular/compiler';
 import { ChangeDetectionStrategy, Component, OnInit,} from '@angular/core';
-import { catchError, EMPTY, filter, map, } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, EMPTY, filter, map, startWith, Subject, } from 'rxjs';
 
 import { ProductCategory } from '../product-categories/product-category';
 import { ProductCategoryService } from '../product-categories/product-category.service'
@@ -13,24 +14,34 @@ import { ProductService } from './product.service';
 export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
-  categories: ProductCategory[] = [];
-  selectedCategoryId = 1;
 
-  products$ = this.productService.productsWithCategory$
+  private categorySelectedSubject = new BehaviorSubject<number>(0);
+  categorySelectedAction$ = this.categorySelectedSubject.asObservable();
+
+  products$ = combineLatest([
+    this.productService.productsWithCategory$,
+    this.categorySelectedAction$
+  ])
     .pipe(
+      map(([products, selectedCategoryId]) =>
+      products.filter(product =>
+        selectedCategoryId ? product.categoryId === selectedCategoryId : true
+      )),
       catchError(err => {
         this.errorMessage = err;
         return EMPTY;
-      }),
+      })
     );
 
-  productSimpleFilter$ = this.productService.productsWithCategory$
-  .pipe(
-    map(products =>
-      products.filter(product =>
-        this.selectedCategoryId ? product.categoryId === this.selectedCategoryId : true
-  ))
-);
+
+    categories$ = this.productCategoryService.productCatagories$
+      .pipe(
+        catchError(err => {
+          this.errorMessage = err;
+          return EMPTY;
+        })
+      )
+
   constructor(private productService: ProductService,
               private productCategoryService: ProductCategoryService) { }
 
@@ -39,6 +50,6 @@ export class ProductListComponent {
   }
 
   onSelected(categoryId: string): void {
-    console.log('Not yet implemented');
+    this.categorySelectedSubject.next(+categoryId)
   }
 }
