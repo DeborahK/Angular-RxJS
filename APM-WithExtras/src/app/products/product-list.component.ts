@@ -50,7 +50,7 @@ export class ProductListComponent {
     );
 
   constructor(private productService: ProductService,
-    private productCategoryService: ProductCategoryService) { }
+              private productCategoryService: ProductCategoryService) { }
 
   onAdd(): void {
     this.productService.addProduct();

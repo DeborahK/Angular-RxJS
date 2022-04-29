@@ -85,8 +85,8 @@ export class ProductService {
   )
 
   constructor(private http: HttpClient,
-    private productCategoryService: ProductCategoryService,
-    private supplierService: SupplierService) { }
+              private productCategoryService: ProductCategoryService,
+              private supplierService: SupplierService) { }
 
   addProduct(newProduct?: Product) {
     newProduct = newProduct || this.fakeProduct();

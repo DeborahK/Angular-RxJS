@@ -3,9 +3,9 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 
 import { catchError, combineLatest, concatMap, map, merge, Observable, of, scan, shareReplay, Subject, tap, throwError } from 'rxjs';
 
-import { Product } from './product';
-import { ProductCategoryService } from '../product-categories/product-category.service';
-import { Action } from '../shared/edit-action';
+import { Product } from '../product';
+import { ProductCategoryService } from '../../product-categories/product-category.service';
+import { Action } from '../../shared/edit-action';
 
 /*
   Demonstrates create, update, and delete operations

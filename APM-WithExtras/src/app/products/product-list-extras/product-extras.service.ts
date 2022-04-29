@@ -3,12 +3,12 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 import { BehaviorSubject, catchError, combineLatest, concatMap, delay, EMPTY, map, max, merge, mergeMap, Observable, of, reduce, scan, shareReplay, Subject, switchMap, tap, throwError } from 'rxjs';
 
-import { Product, ProductClass, ProductWithSupplier } from './product';
-import { ProductCategoryService } from '../product-categories/product-category.service';
-import { SupplierService } from '../suppliers/supplier.service';
-import { ProductFromAPI } from './product-data-fromAPI';
-import { SupplierClass } from '../suppliers/supplier';
-import { ProductService } from './product.service';
+import { Product, ProductClass, ProductWithSupplier } from '../product';
+import { ProductCategoryService } from '../../product-categories/product-category.service';
+import { SupplierService } from '../../suppliers/supplier.service';
+import { ProductFromAPI } from '../product-data-fromAPI';
+import { SupplierClass } from '../../suppliers/supplier';
+import { ProductService } from '../product.service';
 
 /*
   Additional examples, not included in the course

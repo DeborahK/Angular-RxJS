@@ -1,16 +1,17 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { BehaviorSubject, catchError, combineLatest, EMPTY, map, merge, Subject, tap } from 'rxjs';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { BehaviorSubject, catchError, combineLatest, EMPTY, map, Subject } from 'rxjs';
 import { ProductCategoryService } from 'src/app/product-categories/product-category.service';
-import { ProductExtrasService } from '../product-list-extras/product-extras.service';
-import { ProductService } from '../product.service';
+import { Product } from '../product';
+import { ProductRegetService } from './product-reget.service';
 
 @Component({
-  templateUrl: './product-list-refresh.component.html',
-  styleUrls: ['./product-list-refresh.component.css'],
+  selector: 'pm-product-list-reget',
+  templateUrl: './product-list-reget.component.html',
+  styleUrls: ['./product-list-reget.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProductListRefreshComponent {
-  pageTitle = 'Product List (Refresh)';
+export class ProductListRegetComponent {
+  pageTitle = 'Product List (Edit with Re-get)';
   private errorMessageSubject = new Subject<string>();
   errorMessage$ = this.errorMessageSubject.asObservable();
 
@@ -18,7 +19,7 @@ export class ProductListRefreshComponent {
   categorySelectedAction$ = this.categorySelectedSubject.asObservable();
 
   products$ = combineLatest([
-    this.productExtrasService.productsWithAdd$,
+    this.productRegetService.productsWithCRUD$,
     this.categorySelectedAction$
   ])
     .pipe(
@@ -31,9 +32,6 @@ export class ProductListRefreshComponent {
         return EMPTY;
       })
     );
-
-  // Whether data is currently loading
-  isLoading$ = this.productExtrasService.isLoadingAction$;
 
   categories$ = this.productCategoryService.productCategories$
     .pipe(
@@ -52,19 +50,23 @@ export class ProductListRefreshComponent {
         ({ products, categories }))
     );
 
-  constructor(private productExtrasService: ProductExtrasService,
+  constructor(private productRegetService: ProductRegetService,
     private productCategoryService: ProductCategoryService
-  ) { }
+    ) { }
 
   onAdd(): void {
-    this.productExtrasService.addProduct();
+    this.productRegetService.addProduct();
   }
 
+  onDelete(product: Product): void {
+    this.productRegetService.deleteProduct(product);
+  }
+  
   onSelected(categoryId: string): void {
     this.categorySelectedSubject.next(+categoryId);
   }
 
-  onRefresh(): void {
-    this.productExtrasService.refreshData();
+  onUpdate(product: Product): void {
+    this.productRegetService.updateProduct(product);
   }
 }

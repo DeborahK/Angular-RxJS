@@ -43,6 +43,16 @@
             <td>{{ product.category }}</td>
             <td>{{ product.price | currency:"USD":"symbol":"1.2-2" }}</td>
             <td>{{ product.quantityInStock }}</td>
+            <td>
+              <button type="button"
+                      class="btn btn-outline-primary mx-2"
+                      (click)="onUpdate(product)">Update
+              </button>
+              <button type="button"
+                      class="btn btn-outline-warning"
+                      (click)="onDelete(product)">Delete
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>

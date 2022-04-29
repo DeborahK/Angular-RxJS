@@ -11,6 +11,7 @@ import { ProductListRefreshComponent } from './product-list-refresh/product-list
 import { SharedModule } from '../shared/shared.module';
 import { ProductListEditComponent } from './product-list-edit/product-list-edit.component';
 import { ProductListExtrasComponent } from './product-list-extras/product-list-extras.component';
+import { ProductListRegetComponent } from './product-list-reget/product-list-reget.component';
 
 @NgModule({
   imports: [
@@ -36,6 +37,10 @@ import { ProductListExtrasComponent } from './product-list-extras/product-list-e
       {
         path: 'refresh',
         component: ProductListRefreshComponent
+      }      ,
+      {
+        path: 'reget',
+        component: ProductListRegetComponent
       }
     ])
   ],
@@ -46,7 +51,8 @@ import { ProductListExtrasComponent } from './product-list-extras/product-list-e
     ProductDetailComponent,
     ProductListEditComponent,
     ProductListExtrasComponent,
-    ProductListRefreshComponent
+    ProductListRefreshComponent,
+    ProductListRegetComponent
   ]
 })
 export class ProductModule { }

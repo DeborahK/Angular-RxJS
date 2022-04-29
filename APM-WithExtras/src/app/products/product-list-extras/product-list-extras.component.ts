@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BehaviorSubject, catchError, combineLatest, EMPTY, map, Subject } from 'rxjs';
 
 import { ProductCategoryService } from 'src/app/product-categories/product-category.service';
-import { ProductExtrasService } from '../product-extras.service';
+import { ProductExtrasService } from './product-extras.service';
 
 @Component({
   templateUrl: './product-list-extras.component.html',
