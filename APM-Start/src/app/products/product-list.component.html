@@ -7,24 +7,19 @@
     <div class="container">
       <div class="row justify-content-between">
         <div class="col-3">
-          <select class="form-control"
-                  (change)="onSelected($any($event.target).value)">
+          <select class="form-control" (change)="onSelected($any($event.target).value)">
             <option value="0">- Display All -</option>
-            <option *ngFor="let category of categories"
-                    [value]="category.id">{{ category.name }}</option>
+            <option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</option>
           </select>
         </div>
         <div class="col-2">
-          <button type="button"
-                  class="btn btn-outline-secondary"
-                  (click)="onAdd()">Add Product</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="onAdd()">Add Product</button>
         </div>
       </div>
     </div>
 
     <div class="table-responsive">
-      <table class="table mb-0"
-             *ngIf="products">
+      <table class="table mb-0" *ngIf="products$ | async as products">
         <thead>
           <tr>
             <th>Product</th>
@@ -49,7 +44,6 @@
   </div>
 </div>
 
-<div class="alert alert-danger"
-     *ngIf="errorMessage">
+<div class="alert alert-danger" *ngIf="errorMessage">
   {{ errorMessage }}
 </div>
