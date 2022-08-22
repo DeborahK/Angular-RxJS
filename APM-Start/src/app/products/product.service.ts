@@ -5,9 +5,17 @@ import {
   HttpResponse,
 } from '@angular/common/http';
 
-import { catchError, map, Observable, tap, throwError } from 'rxjs';
+import {
+  catchError,
+  combineLatest,
+  map,
+  Observable,
+  tap,
+  throwError,
+} from 'rxjs';
 
 import { Product } from './product';
+import { ProductCategoryService } from '../product-categories/product-category.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +27,8 @@ export class ProductService {
   //set observable to result of http get. hover over products$ shows we have an observable that emits an array of products
   //tip: hover over observable property to see if you are getting what you expect
   products$ = this.http.get<Product[]>(this.productsUrl).pipe(
+    /*
+    *this mapping removed in order to combine data streams to map to an id string in productsWithCategory$
     map((products) =>
       products.map(
         (product) =>
@@ -28,12 +38,31 @@ export class ProductService {
             searchKey: [product.productName],
           } as Product) //strongly type because expecting a return type of Product. cast to product type
       )
-    ), //map emitted observable to product array, then map the product.price element and then transfrom price to a 50% increase. Because the price was specified as nullible in interface, use conditional to handle it. '?' = if product.price has value, multiply by 1.5, ':' otherwise it's 0. product.price ? product.price * 1.5 : 0,
+    ), map emitted observable to product array, then map the product.price element and then transfrom price to a 50% increase. Because the price was specified as nullible in interface, use conditional to handle it. '?' = if product.price has value, multiply by 1.5, ':' otherwise it's 0. product.price ? product.price * 1.5 : 0,*/
     tap((data) => console.log('Products: ', JSON.stringify(data))),
     catchError(this.handleError)
   );
 
-  constructor(private http: HttpClient) {}
+  productsWithCategory$ = combineLatest([
+    this.products$,
+    this.productCategoryService.productCategories$,
+  ]).pipe(
+    map(([products, categories]) =>
+      products.map(
+        (product) =>
+          ({
+            ...product,
+            price: product.price ? product.price * 1.5 : 0,
+            category: categories.find((c) => product.categoryId === c.id)?.name,
+            searchKey: [product.productName],
+          } as Product)
+      )
+    )
+  );
+  constructor(
+    private http: HttpClient,
+    private productCategoryService: ProductCategoryService
+  ) {}
 
   /**
    * replaced with  products$ = ... to make more declarative

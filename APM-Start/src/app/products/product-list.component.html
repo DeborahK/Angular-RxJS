@@ -9,7 +9,7 @@
         <div class="col-3">
           <select class="form-control" (change)="onSelected($any($event.target).value)">
             <option value="0">- Display All -</option>
-            <option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</option>
+            <option *ngFor="let category of categories$ | async" [value]="category.id">{{ category.name }}</option>
           </select>
         </div>
         <div class="col-2">
@@ -19,7 +19,7 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table mb-0" *ngIf="products$ | async as products">
+      <table class="table mb-0" *ngIf="productsSimpleFilter$ | async as products">
         <thead>
           <tr>
             <th>Product</th>
@@ -33,7 +33,7 @@
           <tr *ngFor="let product of products">
             <td>{{ product.productName }}</td>
             <td>{{ product.productCode }}</td>
-            <td>{{ product.categoryId }}</td>
+            <td>{{ product.category }}</td>
             <td>{{ product.price | currency:"USD":"symbol":"1.2-2" }}</td>
             <td>{{ product.quantityInStock }}</td>
           </tr>
