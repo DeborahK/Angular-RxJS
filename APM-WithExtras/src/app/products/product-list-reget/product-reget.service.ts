@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
-import { BehaviorSubject, catchError, combineLatest, combineLatestWith, concatMap, map, merge, Observable, of, scan, shareReplay, Subject, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatestWith, concatMap,
+  map, merge, Observable, of, startWith, Subject, tap, throwError } from 'rxjs';
 
 import { Product } from '../product';
 import { ProductCategoryService } from '../../product-categories/product-category.service';
@@ -23,10 +24,7 @@ export class ProductRegetService {
   products$ = this.productsSubject.asObservable();
 
   // Action Stream for adding/updating/deleting products
-  private productModifiedSubject = new BehaviorSubject<Action<Product>>({
-    item: this.emptyProduct,
-    action: 'none'
-  });
+  private productModifiedSubject = new Subject<Action<Product>>();
   productModifiedAction$ = this.productModifiedSubject.asObservable();
 
   // Save the product via http
@@ -35,6 +33,7 @@ export class ProductRegetService {
     this.products$,
     this.productModifiedAction$
       .pipe(
+        startWith({item: this.emptyProduct,action: 'none'} as Action<Product>),
         concatMap(operation => this.saveProduct(operation)),
         concatMap(() => this.getProducts())
       ));
