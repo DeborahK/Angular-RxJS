@@ -1,26 +1,78 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpResponse,
+} from '@angular/common/http';
 
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import {
+  catchError,
+  combineLatest,
+  map,
+  Observable,
+  tap,
+  throwError,
+} from 'rxjs';
 
 import { Product } from './product';
+import { ProductCategoryService } from '../product-categories/product-category.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductService {
   private productsUrl = 'api/products';
   private suppliersUrl = 'api/suppliers';
-  
-  constructor(private http: HttpClient) { }
 
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.productsUrl)
-      .pipe(
-        tap(data => console.log('Products: ', JSON.stringify(data))),
-        catchError(this.handleError)
-      );
+  //set observable to result of http get. hover over products$ shows we have an observable that emits an array of products
+  //tip: hover over observable property to see if you are getting what you expect
+  products$ = this.http.get<Product[]>(this.productsUrl).pipe(
+    /*
+    *this mapping removed in order to combine data streams to map to an id string in productsWithCategory$
+    map((products) =>
+      products.map(
+        (product) =>
+          ({
+            ...product, //spread operator
+            price: product.price ? product.price * 1.5 : 0,
+            searchKey: [product.productName],
+          } as Product) //strongly type because expecting a return type of Product. cast to product type
+      )
+    ), map emitted observable to product array, then map the product.price element and then transfrom price to a 50% increase. Because the price was specified as nullible in interface, use conditional to handle it. '?' = if product.price has value, multiply by 1.5, ':' otherwise it's 0. product.price ? product.price * 1.5 : 0,*/
+    tap((data) => console.log('Products: ', JSON.stringify(data))),
+    catchError(this.handleError)
+  );
+
+  productsWithCategory$ = combineLatest([
+    this.products$,
+    this.productCategoryService.productCategories$,
+  ]).pipe(
+    map(([products, categories]) =>
+      products.map(
+        (product) =>
+          ({
+            ...product,
+            price: product.price ? product.price * 1.5 : 0,
+            category: categories.find((c) => product.categoryId === c.id)?.name,
+            searchKey: [product.productName],
+          } as Product)
+      )
+    )
+  );
+  constructor(
+    private http: HttpClient,
+    private productCategoryService: ProductCategoryService
+  ) {}
+
+  /**
+   * replaced with  products$ = ... to make more declarative
+   *   getProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(this.productsUrl).pipe(
+      tap((data) => console.log('Products: ', JSON.stringify(data))),
+      catchError(this.handleError)
+    ); //uses interface created in product.ts. Have to handle error in product-list compoenent that calls the getProducts method
   }
+   */
 
   private fakeProduct(): Product {
     return {
@@ -31,7 +83,7 @@ export class ProductService {
       price: 8.9,
       categoryId: 3,
       // category: 'Toolbox',
-      quantityInStock: 30
+      quantityInStock: 30,
     };
   }
 
@@ -50,5 +102,4 @@ export class ProductService {
     console.error(err);
     return throwError(() => errorMessage);
   }
-
 }
