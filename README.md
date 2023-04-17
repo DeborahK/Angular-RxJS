@@ -8,3 +8,5 @@ Find the associated Pluralsight course here: https://app.pluralsight.com/library
 `APM-WithExtras`: The completed files with some extra code. Use this to see some additional techniques not included in the course.
 
 I've developed a few additional examples, including using action streams to "pass" parameters and retrieve multiple related datasets here: https://stackblitz.com/edit/angular-todos-deborahk
+
+To work through this course with stackblitz, start with the APM-Start project using this link: https://stackblitz.com/github/DeborahK/Angular-RxJS/tree/master/APM-Start
